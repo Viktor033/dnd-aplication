@@ -1,0 +1,7 @@
+com\vkdev\dmengine\core\ports\AiProvider.class
+com\vkdev\dmengine\infrastructure\adapters\rest\CharacterController.class
+com\vkdev\dmengine\core\ports\CharacterRepository.class
+com\vkdev\dmengine\DmEngineApplication.class
+com\vkdev\dmengine\core\domain\CharacterEntity.class
+com\vkdev\dmengine\infrastructure\adapters\rest\CampaignController.class
+com\vkdev\dmengine\infrastructure\adapters\MockAiAdapter.class

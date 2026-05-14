@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM Engine - War Room 5.5 Elite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #d97706;
+            --bg-dark: rgba(15, 23, 42, 0.85);
+        }
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: url('C:/Users/vikdu/.gemini/antigravity/brain/63a6a029-6e1d-4654-942e-85a9fbc10d19/dnd_epic_background_1778774437878.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #f8fafc; 
+            min-height: 100vh;
+        }
+        .medieval-font { font-family: 'MedievalSharp', cursive; }
+        .glass { background: var(--bg-dark); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
+        .parchment { background-color: #f3e5ab; border: 4px solid #3d2b1f; color: #1a1a1a; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+        .parchment:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        .stat-box { background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.1); text-align: center; border-radius: 4px; padding: 2px; }
+        .scroll-custom::-webkit-scrollbar { width: 4px; }
+        .scroll-custom::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        
+        .health-bar-bg { background: #333; height: 6px; border-radius: 3px; overflow: hidden; }
+        .health-bar-fill { height: 100%; transition: width 0.5s ease-in-out; }
+        
+        @keyframes shine { 100% { left: 100%; } }
+        .animate-shine { animation: shine 2s infinite; left: -100%; width: 100%; height: 100%; position: absolute; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .log-entry { animation: slideIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="p-2 md:p-6">
+
+    <header class="flex justify-between items-center mb-8 glass p-4 shadow-2xl">
+        <h1 class="text-3xl md:text-5xl medieval-font text-amber-500 font-bold uppercase tracking-tighter drop-shadow-lg">Dungeon Master Engine <span class="text-sm font-normal text-white/50 block md:inline md:ml-4 tracking-widest">v5.5 ELITE</span></h1>
+        <div class="flex gap-4">
+            <button onclick="toggleDiceRoller()" class="bg-amber-600 hover:bg-amber-500 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Lanzar Dados">🎲</button>
+            <button onclick="toggleLog()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Ver Bitácora">📜</button>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 max-w-[1900px] mx-auto">
+        
+        <!-- PANEL DE INVOCACIÓN -->
+        <div class="xl:col-span-3">
+            <div class="glass p-6 rounded-2xl shadow-2xl sticky top-6">
+                <h2 class="text-2xl medieval-font text-amber-500 mb-6 border-b border-white/10 pb-2 text-center italic">Invocación de Aventurero</h2>
+                <div class="space-y-4">
+                    <div class="relative">
+                        <input type="text" id="charName" placeholder="Nombre del Héroe" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-amber-500 transition-colors">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="charRace" onchange="updateRacePreview('racePreview', this.value)" class="p-3 bg-slate-900 border border-white/10 rounded-xl text-sm text-white">
+                            <option value="">Especie...</option>
+                            <option value="Human">Humano</option><option value="Elf">Elfo</option>
+                            <option value="Dwarf">Enano</option><option value="Halfling">Mediano</option>
+                            <option value="Gnome">Gnomo</option><option value="Dragonborn">Dragonborn</option>
+                            <option value="Tiefling">Tiefling</option><option value="Orc">Orco</option>
+                            <option value="Goliath">Goliath</option><option value="Aasimar">Aasimar</option>
+                            <option value="Fairy">Hada</option><option value="Shifter">Shifter</option>
+                            <option value="Warforged">Warforged</option>
+                        </select>
+                        <select id="charGender" onchange="updateRacePreview('racePreview', document.getElementById('charRace').value)" class="p-3 bg-slate-900 border border-white/10 rounded-xl text-sm text-white font-bold">
+                            <option value="M">♂ Hombre</option>
+                            <option value="F">♀ Mujer</option>
+                        </select>
+                    </div>
+
+                    <div id="racePreview" class="h-32 w-full rounded-xl border border-white/10 bg-cover bg-center hidden shadow-2xl transition-all duration-700 hover:scale-105"></div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="charClass" placeholder="Clase" class="p-3 bg-white/5 border border-white/10 rounded-xl text-sm">
+                        <input type="text" id="charBackground" placeholder="Trasfondo" class="p-3 bg-white/5 border border-white/10 rounded-xl text-sm">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="charAlignment" class="p-3 bg-slate-900 border border-white/10 rounded-xl text-sm">
+                            <option value="">Alineamiento...</option>
+                            <option value="LG">LB</option><option value="NG">NB</option><option value="CG">CB</option>
+                            <option value="LN">LN</option><option value="TN">N</option><option value="CN">CN</option>
+                            <option value="LE">LM</option><option value="NE">NM</option><option value="CE">CM</option>
+                        </select>
+                        <select id="charCategory" class="p-3 bg-slate-900 border border-white/10 rounded-xl text-sm">
+                            <option value="HEROE">🛡️ Jugador</option>
+                            <option value="MONSTRUO">👹 Monstruo</option>
+                            <option value="NPC">👤 NPC</option>
+                        </select>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <div class="flex-1">
+                            <label class="text-[10px] uppercase text-white/50 ml-1">Nivel</label>
+                            <input type="number" id="charLevel" placeholder="1" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-center">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-[10px] uppercase text-white/50 ml-1">HP Máx</label>
+                            <input type="number" id="charHp" placeholder="10" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-center text-red-400 font-bold">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2 bg-black/40 p-3 rounded-xl font-bold">
+                        <div class="text-center text-[10px] text-amber-600">STR<input type="number" id="charStr" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
+                        <div class="text-center text-[10px] text-amber-600">DEX<input type="number" id="charDex" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
+                        <div class="text-center text-[10px] text-amber-600">CON<input type="number" id="charCon" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
+                        <div class="text-center text-[10px] text-amber-600">INT<input type="number" id="charInt" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
+                        <div class="text-center text-[10px] text-amber-600">WIS<input type="number" id="charWis" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
+                        <div class="text-center text-[10px] text-amber-600">CHA<input type="number" id="charCha" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
+                    </div>
+                    
+                    <textarea id="charDesc" placeholder="Rasgos y notas..." class="w-full p-3 bg-white/5 border border-white/10 rounded-xl h-20 text-sm"></textarea>
+                    
+                    <button onclick="saveCharacter()" class="w-full bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] medieval-font uppercase tracking-widest">Forjar Personaje</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LISTAS PRINCIPALES -->
+        <div class="xl:col-span-9 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-[85vh]">
+            <!-- JUGADORES -->
+            <div class="glass p-4 flex flex-col overflow-hidden group">
+                <h2 class="text-xl medieval-font border-b border-blue-500/30 mb-4 flex justify-between items-center text-blue-400">
+                    🛡️ Jugadores <span id="countHeroes" class="bg-blue-600/20 text-blue-400 px-3 py-0.5 rounded-full text-xs border border-blue-500/30">0</span>
+                </h2>
+                <input type="text" onkeyup="filterList('heroList', this.value)" placeholder="Buscar héroe..." class="w-full bg-white/5 border border-white/10 p-2 rounded-lg text-sm mb-4 focus:border-blue-500 outline-none">
+                <div id="heroList" class="space-y-4 overflow-y-auto pr-2 scroll-custom flex-1"></div>
+            </div>
+
+            <!-- NPCs -->
+            <div class="glass p-4 flex flex-col overflow-hidden">
+                <h2 class="text-xl medieval-font border-b border-amber-500/30 mb-4 flex justify-between items-center text-amber-500">
+                    👤 NPCs <span id="countNPCs" class="bg-amber-600/20 text-amber-400 px-3 py-0.5 rounded-full text-xs border border-amber-500/30">0</span>
+                </h2>
+                <input type="text" onkeyup="filterList('npcList', this.value)" placeholder="Buscar NPC..." class="w-full bg-white/5 border border-white/10 p-2 rounded-lg text-sm mb-4 focus:border-amber-500 outline-none">
+                <div id="npcList" class="space-y-4 overflow-y-auto pr-2 scroll-custom flex-1"></div>
+            </div>
+
+            <!-- MONSTRUOS -->
+            <div class="glass p-4 flex flex-col overflow-hidden">
+                <h2 class="text-xl medieval-font border-b border-red-500/30 mb-4 flex justify-between items-center text-red-500">
+                    👹 Monstruos <span id="countMonsters" class="bg-red-600/20 text-red-400 px-3 py-0.5 rounded-full text-xs border border-red-500/30">0</span>
+                </h2>
+                <input type="text" onkeyup="filterList('monsterList', this.value)" placeholder="Buscar monstruo..." class="w-full bg-white/5 border border-white/10 p-2 rounded-lg text-sm mb-4 focus:border-red-500 outline-none">
+                <div id="monsterList" class="space-y-4 overflow-y-auto pr-2 scroll-custom flex-1"></div>
+            </div>
+
+            <!-- INICIATIVA -->
+            <div class="glass p-4 border-amber-500/20 flex flex-col overflow-hidden">
+                <h2 class="text-xl medieval-font border-b border-purple-500/30 mb-4 flex justify-between items-center text-purple-400">
+                    ⚔️ Orden de Turno <button onclick="clearInitiative()" class="text-[10px] bg-purple-600/20 hover:bg-purple-600/40 px-3 py-1 rounded-lg border border-purple-500/30 transition-colors">REINICIAR</button>
+                </h2>
+                <div id="initiativeList" class="space-y-3 overflow-y-auto pr-2 scroll-custom flex-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL DE DADOS (FLOTANTE) -->
+    <div id="dicePanel" class="fixed bottom-6 right-6 glass p-6 w-72 shadow-2xl hidden z-50 border-amber-500/30 transform transition-all duration-300 translate-y-0">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="medieval-font text-amber-500 text-lg">Caja de Dados</h3>
+            <button onclick="toggleDiceRoller()" class="text-white/50 hover:text-white">✕</button>
+        </div>
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <button onclick="rollDice(4)" class="stat-box hover:bg-amber-600/20 py-3 text-xs transition-colors">d4</button>
+            <button onclick="rollDice(6)" class="stat-box hover:bg-amber-600/20 py-3 text-xs transition-colors">d6</button>
+            <button onclick="rollDice(8)" class="stat-box hover:bg-amber-600/20 py-3 text-xs transition-colors">d8</button>
+            <button onclick="rollDice(10)" class="stat-box hover:bg-amber-600/20 py-3 text-xs transition-colors">d10</button>
+            <button onclick="rollDice(12)" class="stat-box hover:bg-amber-600/20 py-3 text-xs transition-colors">d12</button>
+            <button onclick="rollDice(20)" class="stat-box hover:bg-amber-600/20 py-3 text-xs transition-colors">d20</button>
+        </div>
+        <div id="diceResult" class="text-center py-6 bg-black/40 rounded-xl">
+            <span class="text-5xl font-bold text-amber-500 drop-shadow-[0_0_10px_rgba(217,119,6,0.5)]">--</span>
+        </div>
+    </div>
+
+    <!-- PANEL DE BITÁCORA (LATERAL) -->
+    <div id="combatLogPanel" class="fixed top-0 right-0 h-full w-80 glass border-l border-white/10 p-6 shadow-2xl hidden z-40 transform transition-transform duration-300 translate-x-0">
+        <div class="flex justify-between items-center mb-6 mt-16">
+            <h3 class="medieval-font text-blue-400 text-2xl">Bitácora</h3>
+            <button onclick="toggleLog()" class="text-white/50 hover:text-white">✕</button>
+        </div>
+        <div id="logEntries" class="space-y-3 overflow-y-auto h-[calc(100%-120px)] pr-2 scroll-custom">
+            <p class="text-xs text-white/30 italic text-center">Iniciando sesión de campaña...</p>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDICIÓN (PREMIUM) -->
+    <div id="editModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+        <div class="parchment p-8 max-w-lg w-full shadow-2xl rounded-2xl border-8 border-double border-[#3d2b1f] overflow-y-auto max-h-[90vh]">
+            <h3 class="text-3xl medieval-font font-bold mb-6 text-amber-900 border-b-2 border-amber-800/20 pb-2">Editar Destino</h3>
+            <input type="hidden" id="editId">
+            <div class="space-y-4">
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-amber-900/50 uppercase ml-1">Nombre</label>
+                        <input type="text" id="editName" class="w-full p-3 bg-white/40 border border-amber-900/20 rounded-xl font-bold text-amber-900 focus:outline-none">
+                    </div>
+                    <div class="w-24">
+                        <label class="text-[10px] font-bold text-amber-900/50 uppercase ml-1">Nivel</label>
+                        <input type="number" id="editLevel" class="w-full p-3 bg-white/40 border border-amber-900/20 rounded-xl text-center font-bold text-amber-900">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="editRace" onchange="updateRacePreview('editRacePreview', this.value)" class="p-3 bg-white/40 border border-amber-900/20 rounded-xl text-sm font-bold text-amber-900">
+                        <option value="Human">Humano</option><option value="Elf">Elfo</option>
+                        <option value="Dwarf">Enano</option><option value="Halfling">Halfling</option>
+                        <option value="Gnome">Gnomo</option><option value="Dragonborn">Dragonborn</option>
+                        <option value="Tiefling">Tiefling</option><option value="Orc">Orco</option>
+                        <option value="Goliath">Goliath</option><option value="Aasimar">Aasimar</option>
+                        <option value="Fairy">Hada</option><option value="Shifter">Shifter</option>
+                        <option value="Warforged">Warforged</option>
+                    </select>
+                    <select id="editGender" onchange="updateRacePreview('editRacePreview', document.getElementById('editRace').value)" class="p-3 bg-white/40 border border-amber-900/20 rounded-xl text-sm font-bold text-amber-900">
+                        <option value="M">♂ Hombre</option>
+                        <option value="F">♀ Mujer</option>
+                    </select>
+                </div>
+
+                <div id="editRacePreview" class="h-24 w-full rounded-xl border border-amber-900/20 bg-cover bg-center hidden"></div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" id="editClass" placeholder="Clase" class="p-3 bg-white/40 border border-amber-900/20 rounded-xl text-sm font-bold text-amber-900">
+                    <input type="text" id="editBackground" placeholder="Trasfondo" class="p-3 bg-white/40 border border-amber-900/20 rounded-xl text-sm font-bold text-amber-900">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] font-bold text-amber-900/50 uppercase ml-1">Puntos de Golpe (HP)</label>
+                    <input type="number" id="editHp" class="w-full p-3 bg-white/40 border border-amber-900/20 rounded-xl text-center text-2xl text-red-800 font-bold">
+                </div>
+
+                <div class="grid grid-cols-6 gap-2 bg-black/5 p-3 rounded-xl border border-amber-900/10">
+                    <div class="text-center font-bold text-[10px] text-amber-900">STR<input type="number" id="editStr" class="w-full bg-transparent text-center border-b border-amber-900 text-amber-900 font-bold"></div>
+                    <div class="text-center font-bold text-[10px] text-amber-900">DEX<input type="number" id="editDex" class="w-full bg-transparent text-center border-b border-amber-900 text-amber-900 font-bold"></div>
+                    <div class="text-center font-bold text-[10px] text-amber-900">CON<input type="number" id="editCon" class="w-full bg-transparent text-center border-b border-amber-900 text-amber-900 font-bold"></div>
+                    <div class="text-center font-bold text-[10px] text-amber-900">INT<input type="number" id="editInt" class="w-full bg-transparent text-center border-b border-amber-900 text-amber-900 font-bold"></div>
+                    <div class="text-center font-bold text-[10px] text-amber-900">WIS<input type="number" id="editWis" class="w-full bg-transparent text-center border-b border-amber-900 text-amber-900 font-bold"></div>
+                    <div class="text-center font-bold text-[10px] text-amber-900">CHA<input type="number" id="editCha" class="w-full bg-transparent text-center border-b border-amber-900 text-amber-900 font-bold"></div>
+                </div>
+
+                <textarea id="editDesc" class="w-full p-3 bg-white/40 border border-amber-900/20 rounded-xl h-24 text-sm font-bold text-amber-900"></textarea>
+                
+                <div class="flex gap-4 pt-4">
+                    <button onclick="closeEditModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-bold transition-colors">RETROCEDER</button>
+                    <button onclick="updateCharacter()" class="flex-1 bg-amber-800 hover:bg-amber-700 text-white py-4 rounded-xl font-bold transition-colors">ACTUALIZAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE BORRADO -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-[60] p-4">
+        <div class="parchment p-10 max-w-sm w-full text-center border-8 border-double border-red-900 shadow-[0_0_50px_rgba(153,27,27,0.5)]">
+            <h3 class="text-4xl medieval-font font-bold mb-8 text-red-900 italic">¿Sentenciar al Olvido?</h3>
+            <div class="flex gap-6 justify-center">
+                <button onclick="closeDeleteModal()" class="bg-slate-700 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-600 transition-colors">PIEDAD</button>
+                <button id="confirmDeleteBtn" class="bg-red-800 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors shadow-lg">SENTENCIAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE INICIATIVA RÁPIDA -->
+    <div id="initiativeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-[100] p-4">
+        <div class="parchment p-8 max-w-xs w-full text-center border-4 border-purple-900 rounded-2xl shadow-2xl">
+            <h3 id="initModalName" class="text-2xl medieval-font font-bold mb-6 text-purple-900">Tirada de Iniciativa</h3>
+            <div class="relative">
+                <input type="number" id="manualRoll" class="w-full p-6 bg-white/50 border-2 border-purple-900 rounded-2xl text-center text-6xl font-bold text-purple-900 outline-none focus:border-purple-600 transition-colors">
+                <div class="absolute -top-2 -right-2 bg-purple-900 text-white p-2 rounded-full animate-bounce">🎲</div>
+            </div>
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeInitModal()" class="flex-1 bg-slate-700 text-white py-3 rounded-xl font-bold">X</button>
+                <button onclick="confirmManualInitiative()" class="flex-1 bg-purple-800 text-white py-3 rounded-xl font-bold hover:bg-purple-700 transition-all shadow-lg">FIJAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEVEL UP ANIMATION -->
+    <div id="levelUpModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-[110] p-4">
+        <div class="text-center p-16 border-8 border-amber-600 rounded-3xl relative overflow-hidden bg-black/60 shadow-[0_0_100px_rgba(217,119,6,0.3)] animate-fade-in">
+            <div class="animate-shine"></div>
+            <h2 class="font-bold text-8xl text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-amber-400 to-amber-700 medieval-font italic drop-shadow-2xl">LEVEL UP!</h2>
+            <p class="text-white/50 mt-4 tracking-[1em] uppercase text-sm">Tu leyenda crece...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

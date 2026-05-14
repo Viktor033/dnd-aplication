@@ -1,0 +1,7 @@
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\CharacterEntity.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\ports\AiProvider.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\ports\CharacterRepository.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\DmEngineApplication.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\MockAiAdapter.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\rest\CampaignController.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\rest\CharacterController.java
