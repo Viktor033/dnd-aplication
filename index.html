@@ -13,10 +13,18 @@
         }
         body { 
             font-family: 'Outfit', sans-serif; 
-            background: url('C:/Users/vikdu/.gemini/antigravity/brain/63a6a029-6e1d-4654-942e-85a9fbc10d19/dnd_dragon_epic_bg_1778776612300.png') no-repeat center center fixed;
+            background: url('./background.png'), url('https://images.alphacoders.com/132/1328328.jpeg') no-repeat center center fixed;
             background-size: cover;
             color: #f8fafc; 
             min-height: 100vh;
+        }
+        /* Optimización para Celulares */
+        @media (max-width: 768px) {
+            body {
+                background-attachment: scroll; /* Mejora el rendimiento en móviles */
+                background-position: 70% center; /* Centra mejor al dragón en pantallas verticales */
+            }
+            .glass { backdrop-filter: blur(8px); }
         }
         .medieval-font { font-family: 'MedievalSharp', cursive; }
         .glass { background: var(--bg-dark); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
@@ -288,6 +296,13 @@
             <p class="text-white/50 mt-4 tracking-[1em] uppercase text-sm">Tu leyenda crece...</p>
         </div>
     </div>
+
+    <!-- BOTÓN VOLVER ARRIBA -->
+    <button id="backToTop" onclick="scrollToTop()" class="fixed bottom-24 right-6 bg-amber-600/80 hover:bg-amber-500 text-white p-3 rounded-full shadow-2xl transition-all duration-300 translate-y-20 opacity-0 z-50 border border-white/10" title="Volver al inicio">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+    </button>
 
     <script src="script.js"></script>
 </body>

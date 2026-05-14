@@ -259,6 +259,20 @@ function updateRacePreview(containerId, race) {
     } else container.classList.add('hidden');
 }
 
+// --- SCROLL Y UI EXTRAS ---
+window.onscroll = function() {
+    const btn = document.getElementById("backToTop");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        btn.classList.remove("translate-y-20", "opacity-0");
+    } else {
+        btn.classList.add("translate-y-20", "opacity-0");
+    }
+};
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function toggleDiceRoller() { document.getElementById('dicePanel').classList.toggle('hidden'); }
 function toggleLog() { document.getElementById('combatLogPanel').classList.toggle('hidden'); }
 function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
