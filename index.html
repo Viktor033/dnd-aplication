@@ -48,6 +48,7 @@
     <header class="flex justify-between items-center mb-8 glass p-4 shadow-2xl">
         <h1 class="text-3xl md:text-5xl medieval-font text-amber-500 font-bold uppercase tracking-tighter drop-shadow-lg">Dungeon Master Engine <span class="text-sm font-normal text-white/50 block md:inline md:ml-4 tracking-widest">v5.5 ELITE</span></h1>
         <div class="flex gap-4">
+            <button onclick="generateRoom()" class="bg-purple-700 hover:bg-purple-600 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Generar Narrativa IA">🧙</button>
             <button onclick="toggleDiceRoller()" class="bg-amber-600 hover:bg-amber-500 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Lanzar Dados">🎲</button>
             <button onclick="toggleLog()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Ver Bitácora">📜</button>
         </div>
@@ -135,6 +136,7 @@
             <div class="glass p-4 flex flex-col overflow-hidden group">
                 <h2 class="text-xl medieval-font border-b border-blue-500/30 mb-4 flex justify-between items-center text-blue-400">
                     🛡️ Jugadores <span id="countHeroes" class="bg-blue-600/20 text-blue-400 px-3 py-0.5 rounded-full text-xs border border-blue-500/30">0</span>
+                    <button onclick="purgeDead()" class="text-[9px] bg-red-900/40 hover:bg-red-800 px-2 py-1 rounded border border-red-500/30 transition-colors" title="Eliminar todos los muertos">PURGAR</button>
                 </h2>
                 <input type="text" onkeyup="filterList('heroList', this.value)" placeholder="Buscar héroe..." class="w-full bg-white/5 border border-white/10 p-2 rounded-lg text-sm mb-4 focus:border-blue-500 outline-none">
                 <div id="heroList" class="space-y-4 overflow-y-auto pr-2 scroll-custom flex-1"></div>

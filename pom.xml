@@ -39,6 +39,12 @@
 			<artifactId>spring-ai-anthropic-spring-boot-starter</artifactId>
 		</dependency>
 
+		<!-- Validaciones con @Valid, @NotBlank, @Min, etc. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
