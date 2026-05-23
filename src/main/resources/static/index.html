@@ -7,72 +7,67 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <style>
+        /* ═══════════════════════════════════════════
+           VARIABLES & RESET
+        ═══════════════════════════════════════════ */
         :root {
             --gold: #c9a84c;
             --gold-light: #f0d080;
             --gold-dark: #8b6914;
             --blood: #8b1a1a;
-            --parchment: #f5e6c8;
-            --parchment-dark: #e8d5a3;
             --ink: #1a0f00;
-            --glass-bg: rgba(8, 12, 24, 0.82);
+            --glass-bg: rgba(8, 12, 24, 0.85);
             --glass-border: rgba(201, 168, 76, 0.2);
+            --header-h: 58px;
+            --sidebar-w: 300px;
+            --tabbar-h: 60px;
         }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        * { box-sizing: border-box; }
-
+        /* ═══════════════════════════════════════════
+           BODY & FONDO
+        ═══════════════════════════════════════════ */
         body {
             font-family: 'Crimson Text', serif;
             background-color: #050810;
             background-image:
-                radial-gradient(ellipse at 20% 50%, rgba(139, 26, 26, 0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 50%, rgba(139,26,26,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
                 url('https://images.alphacoders.com/132/1328328.jpeg');
             background-size: cover;
             background-position: center top;
             background-attachment: fixed;
             color: #e8dcc8;
             min-height: 100vh;
+            overflow: hidden;
         }
-
         body::before {
             content: '';
-            position: fixed;
-            inset: 0;
-            background: 
-                linear-gradient(to bottom, rgba(5,8,16,0.55) 0%, rgba(5,8,16,0.78) 100%),
-                radial-gradient(ellipse at 50% 0%, rgba(139,26,26,0.12) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
+            position: fixed; inset: 0;
+            background: linear-gradient(to bottom, rgba(5,8,16,0.55), rgba(5,8,16,0.80));
+            pointer-events: none; z-index: 0;
         }
-
         body > * { position: relative; z-index: 1; }
 
-        /* TIPOGRAFÍA */
-        .font-title    { font-family: 'Cinzel Decorative', cursive; }
-        .font-heading  { font-family: 'Cinzel', serif; }
-        .font-body     { font-family: 'Crimson Text', serif; }
+        /* ═══════════════════════════════════════════
+           TIPOGRAFÍA
+        ═══════════════════════════════════════════ */
+        .font-title   { font-family: 'Cinzel Decorative', cursive; }
+        .font-heading { font-family: 'Cinzel', serif; }
 
-        /* GLASS */
+        /* ═══════════════════════════════════════════
+           GLASS
+        ═══════════════════════════════════════════ */
         .glass {
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-        }
-        .glass-hover { transition: border-color 0.3s, box-shadow 0.3s; }
-        .glass-hover:hover { border-color: rgba(201,168,76,0.5); box-shadow: 0 0 30px rgba(201,168,76,0.08); }
-
-        /* VIGNETTE lateral para dar profundidad */
-        .vignette-left {
-            box-shadow: inset 8px 0 30px rgba(5,8,16,0.6);
-        }
-        .vignette-right {
-            box-shadow: inset -8px 0 30px rgba(5,8,16,0.6);
         }
 
-        /* PERGAMINO */
+        /* ═══════════════════════════════════════════
+           PERGAMINO
+        ═══════════════════════════════════════════ */
         .parchment {
             background: linear-gradient(135deg, #f5e6c8 0%, #edd9a3 50%, #e8d090 100%);
             border: 2px solid var(--gold-dark);
@@ -82,38 +77,22 @@
         }
         .parchment::before {
             content: '';
-            position: absolute;
-            inset: 0;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-            pointer-events: none;
-            opacity: 0.5;
+            position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; opacity: 0.5;
         }
-        .parchment-hover { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+        .parchment-hover { transition: transform 0.25s, box-shadow 0.25s; }
         .parchment-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
 
-        /* DIVISOR DORADO */
-        .divider-gold {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            margin: 8px 0;
-        }
-
-        /* ORNAMENTO */
-        .ornament::before, .ornament::after {
-            content: '✦';
-            color: var(--gold-dark);
-            font-size: 10px;
-            margin: 0 6px;
-            opacity: 0.7;
-        }
-
-        /* INPUTS */
+        /* ═══════════════════════════════════════════
+           INPUTS
+        ═══════════════════════════════════════════ */
         .dm-input {
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(201,168,76,0.2);
             border-radius: 8px;
             color: #e8dcc8;
-            padding: 10px 14px;
+            padding: 9px 13px;
             width: 100%;
             font-family: 'Crimson Text', serif;
             font-size: 15px;
@@ -124,7 +103,9 @@
         .dm-input::placeholder { color: rgba(232,220,200,0.3); }
         select.dm-input option { background: #0d1117; color: #e8dcc8; }
 
-        /* BOTONES */
+        /* ═══════════════════════════════════════════
+           BOTONES
+        ═══════════════════════════════════════════ */
         .btn-gold {
             background: linear-gradient(135deg, #8b6914, #c9a84c, #8b6914);
             background-size: 200% 100%;
@@ -133,12 +114,10 @@
             font-family: 'Cinzel', serif;
             font-weight: 700;
             letter-spacing: 0.1em;
-            transition: background-position 0.3s, box-shadow 0.3s, transform 0.15s;
             cursor: pointer;
+            transition: background-position 0.3s, box-shadow 0.3s, transform 0.15s;
         }
         .btn-gold:hover { background-position: right; box-shadow: 0 0 20px rgba(201,168,76,0.4); transform: translateY(-1px); }
-        .btn-gold:active { transform: translateY(0); }
-
         .btn-ghost {
             background: transparent;
             border: 1px solid rgba(201,168,76,0.3);
@@ -146,203 +125,366 @@
             font-family: 'Cinzel', serif;
             font-size: 11px;
             letter-spacing: 0.08em;
-            transition: all 0.2s;
             cursor: pointer;
+            transition: all 0.2s;
         }
         .btn-ghost:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); }
-
         .btn-icon {
-            width: 40px; height: 40px;
+            width: 38px; height: 38px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 17px;
             cursor: pointer;
             border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: transparent;
         }
         .btn-icon:hover { transform: scale(1.12); box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
 
-        /* STAT BOX */
+        /* ═══════════════════════════════════════════
+           STAT BOX
+        ═══════════════════════════════════════════ */
         .stat-box {
             background: rgba(0,0,0,0.25);
             border: 1px solid rgba(201,168,76,0.2);
             border-radius: 6px;
             text-align: center;
             padding: 4px 2px;
-            transition: border-color 0.2s;
         }
-        .stat-box:hover { border-color: rgba(201,168,76,0.5); }
-        .stat-label { font-family: 'Cinzel', serif; font-size: 9px; color: var(--gold); letter-spacing: 0.05em; }
-        .stat-val { font-size: 15px; font-weight: 600; color: #f0d080; }
+        .stat-label { font-family: 'Cinzel', serif; font-size: 8px; color: var(--gold); letter-spacing: 0.05em; display: block; }
+        .stat-val   { font-size: 13px; font-weight: 700; color: #f0d080; }
 
-        /* HP BAR */
-        .hp-bar-bg { background: rgba(0,0,0,0.5); height: 5px; border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        /* ═══════════════════════════════════════════
+           HP BAR
+        ═══════════════════════════════════════════ */
+        .hp-bar-bg   { background: rgba(0,0,0,0.5); height: 5px; border-radius: 3px; overflow: hidden; }
         .hp-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
 
-        /* BADGE */
+        /* ═══════════════════════════════════════════
+           MISC
+        ═══════════════════════════════════════════ */
+        .divider-gold { height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 8px 0; }
+        .ornament::before, .ornament::after { content: '✦'; color: var(--gold-dark); font-size: 10px; margin: 0 6px; opacity: 0.7; }
         .badge { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.05em; padding: 2px 10px; border-radius: 20px; }
-
-        /* SCROLLBAR */
         .scroll-dm::-webkit-scrollbar { width: 3px; }
-        .scroll-dm::-webkit-scrollbar-track { background: transparent; }
         .scroll-dm::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 10px; }
-
-        /* CARD BORDER COLORS */
         .card-hero    { border-left: 3px solid #3b82f6; }
         .card-npc     { border-left: 3px solid var(--gold); }
         .card-monster { border-left: 3px solid var(--blood); }
+        .dead-card    { opacity: 0.4; filter: grayscale(0.8); }
+        .status-dot   { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .status-online  { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+        .status-offline { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
 
-        /* SECTION HEADERS */
-        .section-hero    { color: #93c5fd; border-color: rgba(59,130,246,0.3); }
-        .section-npc     { color: var(--gold-light); border-color: rgba(201,168,76,0.3); }
-        .section-monster { color: #fca5a5; border-color: rgba(139,26,26,0.5); }
-        .section-init    { color: #c4b5fd; border-color: rgba(139,92,246,0.3); }
-
-        /* ANIMATIONS */
+        /* ═══════════════════════════════════════════
+           ANIMACIONES
+        ═══════════════════════════════════════════ */
         @keyframes fadeSlideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         .anim-in { animation: fadeSlideIn 0.3s ease-out forwards; }
-
-        @keyframes glow { 0%,100% { box-shadow: 0 0 10px rgba(201,168,76,0.2); } 50% { box-shadow: 0 0 25px rgba(201,168,76,0.5); } }
+        @keyframes glow { 0%,100% { box-shadow:0 0 10px rgba(201,168,76,0.2); } 50% { box-shadow:0 0 25px rgba(201,168,76,0.5); } }
         .glow-pulse { animation: glow 3s ease-in-out infinite; }
-
-        @keyframes shimmer { 100% { left: 100%; } }
-        .shimmer-line { position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); animation: shimmer 2.5s infinite; }
-
-        .dead-card { opacity: 0.4; filter: grayscale(0.8); }
-
         @keyframes logIn { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:translateX(0); } }
         .log-entry { animation: logIn 0.25s ease-out forwards; }
-
-        /* STATUS INDICATOR */
-        .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
-        .status-online  { background:#22c55e; box-shadow:0 0 6px #22c55e; }
-        .status-offline { background:#f59e0b; box-shadow:0 0 6px #f59e0b; }
-
-        @media (max-width: 768px) {
-            body { background-attachment: scroll; }
-        }
-
-        /* PARTÍCULAS DE BRASA */
-        .ember {
-            position: fixed;
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: #f97316;
-            box-shadow: 0 0 6px #f97316, 0 0 12px #ef4444;
-            pointer-events: none;
-            z-index: 2;
-            animation: floatEmber linear infinite;
-            opacity: 0;
-        }
-        @keyframes floatEmber {
-            0%   { transform: translateY(100vh) translateX(0) scale(1);   opacity: 0; }
-            10%  { opacity: 1; }
-            90%  { opacity: 0.6; }
-            100% { transform: translateY(-10vh) translateX(var(--drift)) scale(0.3); opacity: 0; }
-        }
-
-        /* TÍTULO CON EFECTO FUEGO */
         @keyframes fireGlow {
             0%,100% { text-shadow: 0 0 10px rgba(201,168,76,0.4), 0 0 30px rgba(239,68,68,0.2); }
-            50%      { text-shadow: 0 0 20px rgba(201,168,76,0.8), 0 0 50px rgba(239,68,68,0.4), 0 0 80px rgba(249,115,22,0.2); }
+            50%      { text-shadow: 0 0 20px rgba(201,168,76,0.8), 0 0 50px rgba(239,68,68,0.4); }
         }
         .fire-title { animation: fireGlow 3s ease-in-out infinite; }
-
-        /* BORDE DORADO ANIMADO en el header */
         @keyframes borderPulse {
             0%,100% { border-bottom-color: rgba(201,168,76,0.25); }
             50%      { border-bottom-color: rgba(201,168,76,0.55); }
         }
         .header-animated { animation: borderPulse 4s ease-in-out infinite; }
+        .ember {
+            position: fixed; border-radius: 50%; pointer-events: none; z-index: 2; opacity: 0;
+            animation: floatEmber linear infinite;
+        }
+        @keyframes floatEmber {
+            0%   { transform: translateY(100vh) translateX(0) scale(1); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 0.6; }
+            100% { transform: translateY(-10vh) translateX(var(--drift)) scale(0.3); opacity: 0; }
+        }
+
+        /* ═══════════════════════════════════════════
+           HEADER
+        ═══════════════════════════════════════════ */
+        #app-header {
+            position: sticky; top: 0; z-index: 30;
+            height: var(--header-h);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px;
+            border-radius: 0;
+            border-top: none; border-left: none; border-right: none;
+            border-bottom: 1px solid rgba(201,168,76,0.25);
+        }
+        .header-brand { display: flex; align-items: center; gap: 12px; }
+        .header-nav   { display: flex; align-items: center; gap: 8px; }
+        .header-center { display: none; }
+
+        /* ═══════════════════════════════════════════
+           LAYOUT PRINCIPAL
+        ═══════════════════════════════════════════ */
+        #app-body {
+            display: flex;
+            height: calc(100vh - var(--header-h));
+            overflow: hidden;
+        }
+
+        /* ═══════════════════════════════════════════
+           SIDEBAR
+        ═══════════════════════════════════════════ */
+        #sidebar {
+            width: var(--sidebar-w);
+            flex-shrink: 0;
+            overflow-y: auto;
+            padding: 16px;
+            border-radius: 0;
+            border-top: none; border-bottom: none; border-left: none;
+            border-right: 1px solid rgba(201,168,76,0.15);
+        }
+        #sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        #sidebar-close-btn { display: none; }
+
+        /* ═══════════════════════════════════════════
+           ÁREA CENTRAL — 4 COLUMNAS
+        ═══════════════════════════════════════════ */
+        #main-area {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            overflow: hidden;
+        }
+        .col-section {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-right: 1px solid rgba(201,168,76,0.1);
+        }
+        .col-section:last-child { border-right: none; }
+        .col-header { padding: 14px 14px 10px; flex-shrink: 0; }
+        .col-list   { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* ═══════════════════════════════════════════
+           BARRA DE TABS (OCULTA EN DESKTOP)
+        ═══════════════════════════════════════════ */
+        #tab-bar {
+            display: none;
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+            height: var(--tabbar-h);
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid rgba(201,168,76,0.2);
+            background: rgba(8,12,24,0.97);
+        }
+        .tab-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 3px; border: none; background: transparent; cursor: pointer;
+            color: rgba(232,220,200,0.35);
+            font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.05em;
+            transition: color 0.2s;
+        }
+        .tab-btn span:first-child { font-size: 18px; }
+        .tab-btn.active-tab { color: var(--gold-light); }
+
+        /* OVERLAY sidebar móvil/tablet */
+        #sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.65); z-index: 25;
+        }
+
+        /* Botón hamburguesa (oculto en desktop) */
+        #hamburger-btn { display: none; }
+
+        /* ═══════════════════════════════════════════
+           TABLET  768px – 1279px
+        ═══════════════════════════════════════════ */
+        @media (min-width: 768px) and (max-width: 1279px) {
+            body { overflow: auto; }
+            #app-body { height: auto; flex-direction: column; overflow: visible; }
+
+            /* Sidebar como drawer lateral */
+            #sidebar {
+                position: fixed; top: 0; left: 0; height: 100%;
+                z-index: 26; width: 300px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                border-right: 1px solid rgba(201,168,76,0.3);
+            }
+            #sidebar.open { transform: translateX(0); }
+            #sidebar-close-btn { display: block; }
+            #hamburger-btn {
+                display: flex; align-items: center; justify-content: center;
+                position: fixed; top: calc(var(--header-h) + 10px); left: 10px;
+                z-index: 24; width: 36px; height: 36px; border-radius: 8px;
+                background: rgba(8,12,24,0.9); border: 1px solid rgba(201,168,76,0.3);
+                color: var(--gold); font-size: 18px; cursor: pointer;
+            }
+
+            /* Grid 2 columnas */
+            #main-area {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                height: auto; overflow: visible;
+            }
+            .col-section {
+                overflow: visible; height: auto; min-height: 400px;
+                border-bottom: 1px solid rgba(201,168,76,0.1);
+            }
+            .col-list { overflow: visible; max-height: none; }
+        }
+
+        /* ═══════════════════════════════════════════
+           MÓVIL  < 768px
+        ═══════════════════════════════════════════ */
+        @media (max-width: 767px) {
+            body { overflow: auto; }
+            #app-body {
+                height: auto; flex-direction: column; overflow: visible;
+                padding-bottom: var(--tabbar-h);
+            }
+
+            /* Sidebar como drawer */
+            #sidebar {
+                position: fixed; top: 0; left: 0; height: 100%;
+                z-index: 26; width: 290px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                border-right: 1px solid rgba(201,168,76,0.3);
+            }
+            #sidebar.open { transform: translateX(0); }
+            #sidebar-close-btn { display: block; }
+            #hamburger-btn {
+                display: flex; align-items: center; justify-content: center;
+                position: fixed; top: calc(var(--header-h) + 10px); left: 10px;
+                z-index: 24; width: 36px; height: 36px; border-radius: 8px;
+                background: rgba(8,12,24,0.9); border: 1px solid rgba(201,168,76,0.3);
+                color: var(--gold); font-size: 18px; cursor: pointer;
+            }
+
+            /* Una sola columna, tabs controlan cuál se ve */
+            #main-area {
+                display: block; height: auto; overflow: visible;
+            }
+            .col-section {
+                display: none; overflow: visible; height: auto;
+            }
+            .col-section.active {
+                display: flex; flex-direction: column;
+            }
+            .col-list { overflow: visible; max-height: none; }
+
+            /* Mostrar barra de tabs */
+            #tab-bar { display: grid; }
+
+            /* Header más compacto */
+            #app-header { padding: 0 10px; }
+            .header-center { display: none !important; }
+        }
+
+        /* ═══════════════════════════════════════════
+           DESKTOP  ≥ 1280px
+        ═══════════════════════════════════════════ */
+        @media (min-width: 1280px) {
+            body { overflow: hidden; }
+            #app-body { height: calc(100vh - var(--header-h)); overflow: hidden; }
+            #sidebar { display: flex; flex-direction: column; }
+            #main-area { display: grid; grid-template-columns: repeat(4, 1fr); height: 100%; overflow: hidden; }
+            .col-section { display: flex; overflow: hidden; }
+            .col-list { overflow-y: auto; }
+            #tab-bar { display: none; }
+            #hamburger-btn { display: none; }
+            #sidebar-overlay { display: none !important; }
+            .header-center { display: flex; }
+        }
+
+        /* ═══════════════════════════════════════════
+           MODALES
+        ═══════════════════════════════════════════ */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 50;
+            align-items: center; justify-content: center; padding: 16px;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+        }
+        .modal-overlay.open { display: flex; }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
 
-<!-- ═══════════════════════════════════════════════════════ HEADER -->
-<header class="glass header-animated sticky top-0 z-30 px-6 py-3 flex items-center justify-between shadow-2xl" style="border-radius:0; border-top:none; border-left:none; border-right:none; border-bottom:1px solid rgba(201,168,76,0.25);">
-    <div class="flex items-center gap-4">
-        <div class="text-4xl" style="filter: drop-shadow(0 0 8px rgba(239,68,68,0.6));">🐉</div>
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header id="app-header" class="glass header-animated">
+    <div class="header-brand">
+        <span style="font-size:28px; filter:drop-shadow(0 0 8px rgba(239,68,68,0.6));">🐉</span>
         <div>
-            <h1 class="font-title text-xl md:text-2xl leading-none fire-title" style="color:var(--gold-light);">
+            <h1 class="font-title fire-title" style="color:var(--gold-light); font-size:clamp(14px,2vw,22px); line-height:1;">
                 Dungeon Master Engine
             </h1>
-            <div class="flex items-center gap-2 mt-0.5">
+            <div style="display:flex; align-items:center; gap:6px; margin-top:3px;">
                 <span id="serverStatus" class="status-dot status-offline"></span>
-                <span id="serverStatusText" class="text-xs font-heading" style="color:rgba(232,220,200,0.4); letter-spacing:0.1em;">CONECTANDO...</span>
+                <span id="serverStatusText" class="font-heading" style="font-size:10px; color:rgba(232,220,200,0.4); letter-spacing:0.1em;">CONECTANDO...</span>
             </div>
         </div>
     </div>
-    <div class="hidden md:flex items-center gap-3 font-heading text-xs uppercase tracking-widest" style="color:rgba(201,168,76,0.4);">
-        <span>⚔</span><span>Campaña Activa</span><span>⚔</span>
+    <div class="header-center font-heading" style="font-size:11px; letter-spacing:0.15em; color:rgba(201,168,76,0.4); align-items:center; gap:8px;">
+        <span>⚔</span><span>CAMPAÑA ACTIVA</span><span>⚔</span>
     </div>
-    <nav class="flex items-center gap-2">
-        <button onclick="generateRoom()" class="btn-icon" style="background:rgba(139,92,246,0.2); color:#c4b5fd;" title="Generar Narrativa IA">🧙</button>
-        <button onclick="toggleDiceRoller()" class="btn-icon" style="background:rgba(201,168,76,0.15); color:var(--gold-light);" title="Lanzar Dados">🎲</button>
+    <nav class="header-nav">
+        <button onclick="generateRoom()" class="btn-icon" style="background:rgba(139,92,246,0.2); color:#c4b5fd;" title="Narrativa IA">🧙</button>
+        <button onclick="toggleDiceRoller()" class="btn-icon" style="background:rgba(201,168,76,0.15); color:var(--gold-light);" title="Dados">🎲</button>
         <button onclick="toggleLog()" class="btn-icon" style="background:rgba(59,130,246,0.15); color:#93c5fd;" title="Bitácora">📜</button>
     </nav>
 </header>
 
-<!-- ═══════════════════════════════════════════════════════ LAYOUT PRINCIPAL -->
-<div class="flex gap-0 h-[calc(100vh-61px)]">
+<!-- Botón hamburguesa (móvil/tablet) -->
+<button id="hamburger-btn" onclick="toggleSidebar()">☰</button>
 
-    <!-- ══════════════════════ SIDEBAR IZQUIERDO — FORMULARIO -->
-    <aside class="w-80 shrink-0 glass overflow-y-auto scroll-dm p-5" style="border-radius:0; border-top:none; border-bottom:none; border-left:none; border-right:1px solid rgba(201,168,76,0.15);">
+<!-- Overlay sidebar -->
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-        <div class="text-center mb-5">
-            <h2 class="font-heading text-base uppercase tracking-widest ornament" style="color:var(--gold);">Invocar Entidad</h2>
-            <div class="divider-gold mt-2"></div>
+<!-- ═══════════════════ APP BODY ═══════════════════ -->
+<div id="app-body">
+
+    <!-- ══════ SIDEBAR ══════ -->
+    <aside id="sidebar" class="glass scroll-dm">
+        <div id="sidebar-header">
+            <h2 class="font-heading ornament" style="color:var(--gold); font-size:13px; letter-spacing:0.1em; text-transform:uppercase;">Invocar Entidad</h2>
+            <button id="sidebar-close-btn" onclick="toggleSidebar()" style="background:none; border:none; color:rgba(232,220,200,0.4); font-size:20px; cursor:pointer; line-height:1;">✕</button>
         </div>
+        <div class="divider-gold"></div>
 
-        <div class="space-y-3">
-            <!-- Nombre -->
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
             <input type="text" id="charName" placeholder="Nombre del personaje..." class="dm-input">
 
-            <!-- Raza + Género -->
-            <div class="grid grid-cols-2 gap-2">
-                <select id="charRace" onchange="updateRacePreview('racePreview', this.value)" class="dm-input">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <select id="charRace" onchange="updateRacePreview('racePreview',this.value)" class="dm-input">
                     <option value="">Especie...</option>
-                    <option value="Human">Humano</option>
-                    <option value="Elf">Elfo</option>
-                    <option value="Dwarf">Enano</option>
-                    <option value="Halfling">Mediano</option>
-                    <option value="Gnome">Gnomo</option>
-                    <option value="Dragonborn">Dragonborn</option>
-                    <option value="Tiefling">Tiefling</option>
-                    <option value="Orc">Orco</option>
-                    <option value="Goliath">Goliath</option>
-                    <option value="Aasimar">Aasimar</option>
-                    <option value="Fairy">Hada</option>
-                    <option value="Shifter">Shifter</option>
+                    <option value="Human">Humano</option><option value="Elf">Elfo</option>
+                    <option value="Dwarf">Enano</option><option value="Halfling">Mediano</option>
+                    <option value="Gnome">Gnomo</option><option value="Dragonborn">Dragonborn</option>
+                    <option value="Tiefling">Tiefling</option><option value="Orc">Orco</option>
+                    <option value="Goliath">Goliath</option><option value="Aasimar">Aasimar</option>
+                    <option value="Fairy">Hada</option><option value="Shifter">Shifter</option>
                     <option value="Warforged">Warforged</option>
                 </select>
-                <select id="charGender" onchange="updateRacePreview('racePreview', document.getElementById('charRace').value)" class="dm-input">
+                <select id="charGender" onchange="updateRacePreview('racePreview',document.getElementById('charRace').value)" class="dm-input">
                     <option value="M">♂ Hombre</option>
                     <option value="F">♀ Mujer</option>
                 </select>
             </div>
 
-            <!-- Preview de raza -->
-            <div id="racePreview" class="hidden h-36 w-full rounded-xl bg-cover bg-center border shadow-xl transition-all duration-500" style="border-color:rgba(201,168,76,0.3);"></div>
+            <div id="racePreview" style="display:none; height:130px; border-radius:10px; background-size:cover; background-position:center; border:1px solid rgba(201,168,76,0.3); transition:all 0.5s;"></div>
 
-            <!-- Clase + Trasfondo -->
-            <div class="grid grid-cols-2 gap-2">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                 <input type="text" id="charClass" placeholder="Clase..." class="dm-input">
                 <input type="text" id="charBackground" placeholder="Trasfondo..." class="dm-input">
             </div>
 
-            <!-- Alineamiento + Categoría -->
-            <div class="grid grid-cols-2 gap-2">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                 <select id="charAlignment" class="dm-input">
                     <option value="">Alineamiento...</option>
-                    <option value="LG">Legal Bueno</option>
-                    <option value="NG">Neutral Bueno</option>
-                    <option value="CG">Caótico Bueno</option>
-                    <option value="LN">Legal Neutral</option>
-                    <option value="TN">Neutral</option>
-                    <option value="CN">Caótico Neutral</option>
-                    <option value="LE">Legal Malvado</option>
-                    <option value="NE">Neutral Malvado</option>
+                    <option value="LG">Legal Bueno</option><option value="NG">Neutral Bueno</option>
+                    <option value="CG">Caótico Bueno</option><option value="LN">Legal Neutral</option>
+                    <option value="TN">Neutral</option><option value="CN">Caótico Neutral</option>
+                    <option value="LE">Legal Malvado</option><option value="NE">Neutral Malvado</option>
                     <option value="CE">Caótico Malvado</option>
                 </select>
                 <select id="charCategory" class="dm-input">
@@ -352,263 +494,255 @@
                 </select>
             </div>
 
-            <!-- Nivel + HP -->
-            <div class="grid grid-cols-2 gap-2">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                 <div>
-                    <label class="stat-label block mb-1 ml-1">NIVEL</label>
-                    <input type="number" id="charLevel" value="1" min="1" max="20" class="dm-input text-center">
+                    <label class="stat-label" style="margin-bottom:4px; display:block;">NIVEL</label>
+                    <input type="number" id="charLevel" value="1" min="1" max="20" class="dm-input" style="text-align:center;">
                 </div>
                 <div>
-                    <label class="stat-label block mb-1 ml-1" style="color:#fca5a5;">HP MÁX</label>
-                    <input type="number" id="charHp" value="10" min="1" class="dm-input text-center" style="color:#fca5a5;">
+                    <label class="stat-label" style="margin-bottom:4px; display:block; color:#fca5a5;">HP MÁX</label>
+                    <input type="number" id="charHp" value="10" min="1" class="dm-input" style="text-align:center; color:#fca5a5;">
                 </div>
             </div>
 
-            <!-- Stats D&D -->
             <div class="divider-gold"></div>
-            <div class="grid grid-cols-6 gap-1.5">
-                <div class="stat-box"><div class="stat-label">STR</div><input type="number" id="charStr" value="10" class="w-full bg-transparent text-center stat-val border-none outline-none"></div>
-                <div class="stat-box"><div class="stat-label">DEX</div><input type="number" id="charDex" value="10" class="w-full bg-transparent text-center stat-val border-none outline-none"></div>
-                <div class="stat-box"><div class="stat-label">CON</div><input type="number" id="charCon" value="10" class="w-full bg-transparent text-center stat-val border-none outline-none"></div>
-                <div class="stat-box"><div class="stat-label">INT</div><input type="number" id="charInt" value="10" class="w-full bg-transparent text-center stat-val border-none outline-none"></div>
-                <div class="stat-box"><div class="stat-label">WIS</div><input type="number" id="charWis" value="10" class="w-full bg-transparent text-center stat-val border-none outline-none"></div>
-                <div class="stat-box"><div class="stat-label">CHA</div><input type="number" id="charCha" value="10" class="w-full bg-transparent text-center stat-val border-none outline-none"></div>
+            <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:6px;">
+                <div class="stat-box"><span class="stat-label">STR</span><input type="number" id="charStr" value="10" class="stat-val" style="width:100%; background:transparent; border:none; outline:none; text-align:center;"></div>
+                <div class="stat-box"><span class="stat-label">DEX</span><input type="number" id="charDex" value="10" class="stat-val" style="width:100%; background:transparent; border:none; outline:none; text-align:center;"></div>
+                <div class="stat-box"><span class="stat-label">CON</span><input type="number" id="charCon" value="10" class="stat-val" style="width:100%; background:transparent; border:none; outline:none; text-align:center;"></div>
+                <div class="stat-box"><span class="stat-label">INT</span><input type="number" id="charInt" value="10" class="stat-val" style="width:100%; background:transparent; border:none; outline:none; text-align:center;"></div>
+                <div class="stat-box"><span class="stat-label">WIS</span><input type="number" id="charWis" value="10" class="stat-val" style="width:100%; background:transparent; border:none; outline:none; text-align:center;"></div>
+                <div class="stat-box"><span class="stat-label">CHA</span><input type="number" id="charCha" value="10" class="stat-val" style="width:100%; background:transparent; border:none; outline:none; text-align:center;"></div>
             </div>
             <div class="divider-gold"></div>
 
-            <!-- Descripción -->
-            <textarea id="charDesc" placeholder="Rasgos, historia, notas del DM..." class="dm-input h-20 resize-none text-sm"></textarea>
+            <textarea id="charDesc" placeholder="Rasgos, historia, notas del DM..." class="dm-input" style="height:80px; resize:none; font-size:14px;"></textarea>
 
-            <!-- Botón -->
-            <button onclick="saveCharacter()" class="btn-gold w-full py-3 rounded-xl text-sm uppercase tracking-widest">
+            <button onclick="saveCharacter()" class="btn-gold" style="width:100%; padding:12px; border-radius:10px; font-size:13px; text-transform:uppercase; letter-spacing:0.1em;">
                 ⚔ Forjar Personaje
             </button>
         </div>
     </aside>
 
-    <!-- ══════════════════════ ÁREA CENTRAL — 4 COLUMNAS -->
-    <main class="flex-1 grid grid-cols-4 gap-0 overflow-hidden">
+    <!-- ══════ ÁREA CENTRAL ══════ -->
+    <main id="main-area">
 
         <!-- JUGADORES -->
-        <section class="flex flex-col border-r overflow-hidden" style="border-color:rgba(201,168,76,0.1);">
-            <div class="px-4 pt-4 pb-3 shrink-0" style="border-bottom:1px solid rgba(59,130,246,0.2);">
-                <div class="flex items-center justify-between mb-2">
-                    <h2 class="font-heading text-sm uppercase tracking-widest section-hero flex items-center gap-2">
+        <section id="heroList-section" class="col-section active">
+            <div class="col-header" style="border-bottom:1px solid rgba(59,130,246,0.2);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                    <h2 class="font-heading" style="font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:#93c5fd; display:flex; align-items:center; gap:6px;">
                         🛡️ Jugadores
                         <span id="countHeroes" class="badge" style="background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3);">0</span>
                     </h2>
-                    <button onclick="purgeDead()" class="btn-ghost px-2 py-1 rounded text-[10px]" style="color:#fca5a5; border-color:rgba(139,26,26,0.4);" title="Purgar caídos">☠ PURGAR</button>
+                    <button onclick="purgeDead()" class="btn-ghost" style="padding:3px 8px; border-radius:6px; color:#fca5a5; border-color:rgba(139,26,26,0.4);">☠ PURGAR</button>
                 </div>
-                <input type="text" onkeyup="filterList('heroList', this.value)" placeholder="Buscar..." class="dm-input text-sm py-2">
+                <input type="text" onkeyup="filterList('heroList',this.value)" placeholder="Buscar..." class="dm-input" style="padding:7px 12px; font-size:13px;">
             </div>
-            <div id="heroList" class="flex-1 overflow-y-auto scroll-dm p-3 space-y-3"></div>
+            <div id="heroList" class="col-list scroll-dm"></div>
         </section>
 
         <!-- NPCs -->
-        <section class="flex flex-col border-r overflow-hidden" style="border-color:rgba(201,168,76,0.1);">
-            <div class="px-4 pt-4 pb-3 shrink-0" style="border-bottom:1px solid rgba(201,168,76,0.2);">
-                <div class="flex items-center justify-between mb-2">
-                    <h2 class="font-heading text-sm uppercase tracking-widest section-npc flex items-center gap-2">
+        <section id="npcList-section" class="col-section">
+            <div class="col-header" style="border-bottom:1px solid rgba(201,168,76,0.2);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                    <h2 class="font-heading" style="font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold-light); display:flex; align-items:center; gap:6px;">
                         👤 NPCs
                         <span id="countNPCs" class="badge" style="background:rgba(201,168,76,0.1); color:var(--gold-light); border:1px solid rgba(201,168,76,0.3);">0</span>
                     </h2>
                 </div>
-                <input type="text" onkeyup="filterList('npcList', this.value)" placeholder="Buscar..." class="dm-input text-sm py-2">
+                <input type="text" onkeyup="filterList('npcList',this.value)" placeholder="Buscar..." class="dm-input" style="padding:7px 12px; font-size:13px;">
             </div>
-            <div id="npcList" class="flex-1 overflow-y-auto scroll-dm p-3 space-y-3"></div>
+            <div id="npcList" class="col-list scroll-dm"></div>
         </section>
 
         <!-- MONSTRUOS -->
-        <section class="flex flex-col border-r overflow-hidden" style="border-color:rgba(201,168,76,0.1);">
-            <div class="px-4 pt-4 pb-3 shrink-0" style="border-bottom:1px solid rgba(139,26,26,0.4);">
-                <div class="flex items-center justify-between mb-2">
-                    <h2 class="font-heading text-sm uppercase tracking-widest section-monster flex items-center gap-2">
+        <section id="monsterList-section" class="col-section">
+            <div class="col-header" style="border-bottom:1px solid rgba(139,26,26,0.4);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                    <h2 class="font-heading" style="font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:#fca5a5; display:flex; align-items:center; gap:6px;">
                         💀 Monstruos
                         <span id="countMonsters" class="badge" style="background:rgba(139,26,26,0.2); color:#fca5a5; border:1px solid rgba(139,26,26,0.4);">0</span>
                     </h2>
                 </div>
-                <input type="text" onkeyup="filterList('monsterList', this.value)" placeholder="Buscar..." class="dm-input text-sm py-2">
+                <input type="text" onkeyup="filterList('monsterList',this.value)" placeholder="Buscar..." class="dm-input" style="padding:7px 12px; font-size:13px;">
             </div>
-            <div id="monsterList" class="flex-1 overflow-y-auto scroll-dm p-3 space-y-3"></div>
+            <div id="monsterList" class="col-list scroll-dm"></div>
         </section>
 
         <!-- INICIATIVA -->
-        <section class="flex flex-col overflow-hidden">
-            <div class="px-4 pt-4 pb-3 shrink-0" style="border-bottom:1px solid rgba(139,92,246,0.3);">
-                <div class="flex items-center justify-between mb-2">
-                    <h2 class="font-heading text-sm uppercase tracking-widest section-init flex items-center gap-2">
-                        ⚔️ Iniciativa
-                    </h2>
-                    <button onclick="clearInitiative()" class="btn-ghost px-2 py-1 rounded text-[10px]" style="color:#c4b5fd; border-color:rgba(139,92,246,0.3);">↺ RESET</button>
+        <section id="initiative-section" class="col-section">
+            <div class="col-header" style="border-bottom:1px solid rgba(139,92,246,0.3);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                    <h2 class="font-heading" style="font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:#c4b5fd;">⚔️ Iniciativa</h2>
+                    <button onclick="clearInitiative()" class="btn-ghost" style="padding:3px 8px; border-radius:6px; color:#c4b5fd; border-color:rgba(139,92,246,0.3);">↺ RESET</button>
                 </div>
-                <div class="text-xs font-heading text-center py-1" style="color:rgba(196,181,253,0.4); letter-spacing:0.1em;">TURNO ACTUAL</div>
-                <div id="currentTurnBadge" class="text-center py-2 rounded-lg text-sm font-heading" style="background:rgba(139,92,246,0.1); color:#c4b5fd; border:1px solid rgba(139,92,246,0.2); min-height:36px;">—</div>
+                <div class="font-heading" style="font-size:9px; text-align:center; color:rgba(196,181,253,0.4); letter-spacing:0.1em; margin-bottom:4px;">TURNO ACTUAL</div>
+                <div id="currentTurnBadge" class="font-heading" style="text-align:center; padding:8px; border-radius:8px; font-size:13px; background:rgba(139,92,246,0.1); color:#c4b5fd; border:1px solid rgba(139,92,246,0.2); min-height:34px;">—</div>
             </div>
-            <div id="initiativeList" class="flex-1 overflow-y-auto scroll-dm p-3 space-y-2"></div>
-            <div class="p-3 shrink-0" style="border-top:1px solid rgba(139,92,246,0.2);">
-                <button onclick="nextTurn()" class="btn-ghost w-full py-2 rounded-lg text-xs" style="color:#c4b5fd; border-color:rgba(139,92,246,0.3);">▶ SIGUIENTE TURNO</button>
+            <div id="initiativeList" class="col-list scroll-dm"></div>
+            <div style="padding:10px; border-top:1px solid rgba(139,92,246,0.2); flex-shrink:0;">
+                <button onclick="nextTurn()" class="btn-ghost" style="width:100%; padding:8px; border-radius:8px; color:#c4b5fd; border-color:rgba(139,92,246,0.3); font-size:11px;">▶ SIGUIENTE TURNO</button>
             </div>
         </section>
+
     </main>
-</div>
+</div><!-- /app-body -->
 
-<!-- ═══════════════════════════════════════════════════════ PANEL DADOS -->
-<div id="dicePanel" class="fixed bottom-6 left-6 glass p-5 w-64 shadow-2xl hidden z-50 glow-pulse" style="border-color:rgba(201,168,76,0.3);">
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="font-heading text-sm uppercase tracking-widest" style="color:var(--gold);">Caja de Dados</h3>
-        <button onclick="toggleDiceRoller()" class="text-white/40 hover:text-white text-lg leading-none">✕</button>
-    </div>
-    <div class="grid grid-cols-3 gap-2 mb-4">
-        <button onclick="rollDice(4)"  class="stat-box py-3 hover:border-amber-500/60 transition-colors cursor-pointer font-heading text-xs" style="color:var(--gold-light);">d4</button>
-        <button onclick="rollDice(6)"  class="stat-box py-3 hover:border-amber-500/60 transition-colors cursor-pointer font-heading text-xs" style="color:var(--gold-light);">d6</button>
-        <button onclick="rollDice(8)"  class="stat-box py-3 hover:border-amber-500/60 transition-colors cursor-pointer font-heading text-xs" style="color:var(--gold-light);">d8</button>
-        <button onclick="rollDice(10)" class="stat-box py-3 hover:border-amber-500/60 transition-colors cursor-pointer font-heading text-xs" style="color:var(--gold-light);">d10</button>
-        <button onclick="rollDice(12)" class="stat-box py-3 hover:border-amber-500/60 transition-colors cursor-pointer font-heading text-xs" style="color:var(--gold-light);">d12</button>
-        <button onclick="rollDice(20)" class="stat-box py-3 hover:border-amber-500/60 transition-colors cursor-pointer font-heading text-xs" style="color:var(--gold-light); border-color:rgba(201,168,76,0.4);">d20</button>
-    </div>
-    <div id="diceResult" class="text-center py-5 rounded-xl" style="background:rgba(0,0,0,0.4); border:1px solid rgba(201,168,76,0.15);">
-        <span class="font-title text-5xl" style="color:var(--gold-light); text-shadow:0 0 20px rgba(201,168,76,0.6);">--</span>
-    </div>
-</div>
+<!-- ═══════════════════ BARRA TABS MÓVIL ═══════════════════ -->
+<nav id="tab-bar">
+    <button id="tab-hero"    class="tab-btn active-tab" onclick="showTab('heroList-section','tab-hero')"><span>🛡️</span><span>Jugadores</span></button>
+    <button id="tab-npc"     class="tab-btn"            onclick="showTab('npcList-section','tab-npc')"><span>👤</span><span>NPCs</span></button>
+    <button id="tab-monster" class="tab-btn"            onclick="showTab('monsterList-section','tab-monster')"><span>💀</span><span>Monstruos</span></button>
+    <button id="tab-init"    class="tab-btn"            onclick="showTab('initiative-section','tab-init')"><span>⚔️</span><span>Turno</span></button>
+</nav>
 
-<!-- ═══════════════════════════════════════════════════════ BITÁCORA -->
-<div id="combatLogPanel" class="fixed top-0 right-0 h-full w-72 glass shadow-2xl hidden z-40" style="border-radius:0; border-right:none; border-top:none; border-bottom:none; border-left:1px solid rgba(201,168,76,0.2);">
-    <div class="flex justify-between items-center p-5 pt-20" style="border-bottom:1px solid rgba(201,168,76,0.15);">
-        <h3 class="font-heading text-sm uppercase tracking-widest" style="color:#93c5fd;">Bitácora de Campaña</h3>
-        <button onclick="toggleLog()" class="text-white/40 hover:text-white text-lg">✕</button>
+<!-- ═══════════════════ PANEL DADOS ═══════════════════ -->
+<div id="dicePanel" class="glass glow-pulse" style="display:none; position:fixed; bottom:70px; right:16px; width:240px; padding:18px; z-index:50; border-radius:12px; border-color:rgba(201,168,76,0.3);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 class="font-heading" style="font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold);">Caja de Dados</h3>
+        <button onclick="toggleDiceRoller()" style="background:none; border:none; color:rgba(232,220,200,0.4); font-size:18px; cursor:pointer; line-height:1;">✕</button>
     </div>
-    <div id="logEntries" class="p-4 space-y-2 overflow-y-auto scroll-dm h-[calc(100%-100px)]">
-        <p class="text-xs text-center italic" style="color:rgba(232,220,200,0.25);">Iniciando sesión...</p>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px;">
+        <button onclick="rollDice(4)"  class="stat-box font-heading" style="padding:10px 4px; cursor:pointer; font-size:12px; color:var(--gold-light);">d4</button>
+        <button onclick="rollDice(6)"  class="stat-box font-heading" style="padding:10px 4px; cursor:pointer; font-size:12px; color:var(--gold-light);">d6</button>
+        <button onclick="rollDice(8)"  class="stat-box font-heading" style="padding:10px 4px; cursor:pointer; font-size:12px; color:var(--gold-light);">d8</button>
+        <button onclick="rollDice(10)" class="stat-box font-heading" style="padding:10px 4px; cursor:pointer; font-size:12px; color:var(--gold-light);">d10</button>
+        <button onclick="rollDice(12)" class="stat-box font-heading" style="padding:10px 4px; cursor:pointer; font-size:12px; color:var(--gold-light);">d12</button>
+        <button onclick="rollDice(20)" class="stat-box font-heading" style="padding:10px 4px; cursor:pointer; font-size:12px; color:var(--gold-light); border-color:rgba(201,168,76,0.4);">d20</button>
+    </div>
+    <div id="diceResult" style="text-align:center; padding:16px; border-radius:10px; background:rgba(0,0,0,0.4); border:1px solid rgba(201,168,76,0.15);">
+        <span class="font-title" style="font-size:44px; color:var(--gold-light); text-shadow:0 0 20px rgba(201,168,76,0.6);">--</span>
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ MODAL EDITAR -->
-<div id="editModal" class="fixed inset-0 hidden items-center justify-center z-50 p-4" style="background:rgba(0,0,0,0.85); backdrop-filter:blur(8px);">
-    <div class="parchment rounded-2xl p-7 w-full max-w-lg shadow-2xl overflow-y-auto max-h-[90vh]" style="border:3px solid var(--gold-dark); box-shadow:0 0 60px rgba(0,0,0,0.8), inset 0 0 40px rgba(201,168,76,0.05);">
-        <h3 class="font-title text-xl mb-1" style="color:var(--ink);">Editar Destino</h3>
-        <div class="divider-gold mb-5" style="background:linear-gradient(90deg,transparent,var(--gold-dark),transparent);"></div>
+<!-- ═══════════════════ BITÁCORA ═══════════════════ -->
+<div id="combatLogPanel" style="display:none; position:fixed; top:0; right:0; height:100%; width:260px; z-index:40; border-left:1px solid rgba(201,168,76,0.2); border-radius:0;" class="glass">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; margin-top:var(--header-h); border-bottom:1px solid rgba(201,168,76,0.15);">
+        <h3 class="font-heading" style="font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:#93c5fd;">Bitácora</h3>
+        <button onclick="toggleLog()" style="background:none; border:none; color:rgba(232,220,200,0.4); font-size:18px; cursor:pointer;">✕</button>
+    </div>
+    <div id="logEntries" class="scroll-dm" style="padding:12px; overflow-y:auto; height:calc(100% - 100px); display:flex; flex-direction:column; gap:4px;">
+        <p style="font-size:11px; text-align:center; color:rgba(232,220,200,0.25); font-style:italic;">Iniciando sesión...</p>
+    </div>
+</div>
+
+<!-- ═══════════════════ MODAL EDITAR ═══════════════════ -->
+<div id="editModal" class="modal-overlay">
+    <div class="parchment" style="border-radius:16px; padding:24px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; border:3px solid var(--gold-dark); box-shadow:0 0 60px rgba(0,0,0,0.8);">
+        <h3 class="font-title" style="font-size:18px; color:var(--ink); margin-bottom:4px;">Editar Destino</h3>
+        <div class="divider-gold" style="background:linear-gradient(90deg,transparent,var(--gold-dark),transparent); margin-bottom:16px;"></div>
         <input type="hidden" id="editId">
-        <div class="space-y-3">
-            <div class="grid grid-cols-3 gap-3">
-                <div class="col-span-2">
-                    <label class="stat-label block mb-1" style="color:var(--gold-dark);">NOMBRE</label>
-                    <input type="text" id="editName" class="w-full p-2.5 rounded-lg font-heading font-bold" style="background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink);">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:grid; grid-template-columns:1fr 80px; gap:10px;">
+                <div>
+                    <label class="stat-label" style="color:var(--gold-dark); margin-bottom:4px; display:block;">NOMBRE</label>
+                    <input type="text" id="editName" style="width:100%; padding:9px; border-radius:8px; background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink); font-family:'Cinzel',serif; font-weight:700; outline:none;">
                 </div>
                 <div>
-                    <label class="stat-label block mb-1" style="color:var(--gold-dark);">NIVEL</label>
-                    <input type="number" id="editLevel" class="w-full p-2.5 rounded-lg text-center font-bold" style="background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink);">
+                    <label class="stat-label" style="color:var(--gold-dark); margin-bottom:4px; display:block;">NIVEL</label>
+                    <input type="number" id="editLevel" style="width:100%; padding:9px; border-radius:8px; background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink); font-weight:700; text-align:center; outline:none;">
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <select id="editRace" onchange="updateRacePreview('editRacePreview', this.value)" class="p-2.5 rounded-lg font-heading" style="background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink);">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <select id="editRace" onchange="updateRacePreview('editRacePreview',this.value)" style="padding:9px; border-radius:8px; background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink); font-family:'Cinzel',serif; outline:none;">
                     <option value="Human">Humano</option><option value="Elf">Elfo</option><option value="Dwarf">Enano</option>
                     <option value="Halfling">Halfling</option><option value="Gnome">Gnomo</option><option value="Dragonborn">Dragonborn</option>
                     <option value="Tiefling">Tiefling</option><option value="Orc">Orco</option><option value="Goliath">Goliath</option>
                     <option value="Aasimar">Aasimar</option><option value="Fairy">Hada</option><option value="Shifter">Shifter</option><option value="Warforged">Warforged</option>
                 </select>
-                <select id="editGender" onchange="updateRacePreview('editRacePreview', document.getElementById('editRace').value)" class="p-2.5 rounded-lg font-heading" style="background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink);">
+                <select id="editGender" onchange="updateRacePreview('editRacePreview',document.getElementById('editRace').value)" style="padding:9px; border-radius:8px; background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink); font-family:'Cinzel',serif; outline:none;">
                     <option value="M">♂ Hombre</option><option value="F">♀ Mujer</option>
                 </select>
             </div>
-            <div id="editRacePreview" class="hidden h-24 w-full rounded-xl bg-cover bg-center" style="border:1px solid rgba(139,105,20,0.3);"></div>
-            <div class="grid grid-cols-2 gap-3">
-                <input type="text" id="editClass" placeholder="Clase" class="p-2.5 rounded-lg" style="background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink);">
-                <input type="text" id="editBackground" placeholder="Trasfondo" class="p-2.5 rounded-lg" style="background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink);">
+            <div id="editRacePreview" style="display:none; height:90px; border-radius:10px; background-size:cover; background-position:center; border:1px solid rgba(139,105,20,0.3);"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <input type="text" id="editClass" placeholder="Clase" style="padding:9px; border-radius:8px; background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink); outline:none;">
+                <input type="text" id="editBackground" placeholder="Trasfondo" style="padding:9px; border-radius:8px; background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink); outline:none;">
             </div>
             <div>
-                <label class="stat-label block mb-1" style="color:var(--blood);">HP MÁXIMO</label>
-                <input type="number" id="editHp" class="w-full p-2.5 rounded-lg text-center text-xl font-bold" style="background:rgba(0,0,0,0.08); border:1px solid rgba(139,26,26,0.4); color:var(--blood);">
+                <label class="stat-label" style="color:var(--blood); margin-bottom:4px; display:block;">HP MÁXIMO</label>
+                <input type="number" id="editHp" style="width:100%; padding:9px; border-radius:8px; background:rgba(0,0,0,0.08); border:1px solid rgba(139,26,26,0.4); color:var(--blood); font-size:18px; font-weight:700; text-align:center; outline:none;">
             </div>
-            <div class="grid grid-cols-6 gap-1.5 p-3 rounded-xl" style="background:rgba(0,0,0,0.1); border:1px solid rgba(139,105,20,0.2);">
-                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><div class="stat-label" style="color:var(--gold-dark);">STR</div><input type="number" id="editStr" class="w-full bg-transparent text-center font-bold border-none outline-none" style="color:var(--ink);"></div>
-                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><div class="stat-label" style="color:var(--gold-dark);">DEX</div><input type="number" id="editDex" class="w-full bg-transparent text-center font-bold border-none outline-none" style="color:var(--ink);"></div>
-                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><div class="stat-label" style="color:var(--gold-dark);">CON</div><input type="number" id="editCon" class="w-full bg-transparent text-center font-bold border-none outline-none" style="color:var(--ink);"></div>
-                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><div class="stat-label" style="color:var(--gold-dark);">INT</div><input type="number" id="editInt" class="w-full bg-transparent text-center font-bold border-none outline-none" style="color:var(--ink);"></div>
-                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><div class="stat-label" style="color:var(--gold-dark);">WIS</div><input type="number" id="editWis" class="w-full bg-transparent text-center font-bold border-none outline-none" style="color:var(--ink);"></div>
-                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><div class="stat-label" style="color:var(--gold-dark);">CHA</div><input type="number" id="editCha" class="w-full bg-transparent text-center font-bold border-none outline-none" style="color:var(--ink);"></div>
+            <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:6px; padding:10px; border-radius:10px; background:rgba(0,0,0,0.1); border:1px solid rgba(139,105,20,0.2);">
+                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><span class="stat-label" style="color:var(--gold-dark);">STR</span><input type="number" id="editStr" style="width:100%; background:transparent; border:none; outline:none; text-align:center; font-weight:700; color:var(--ink);"></div>
+                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><span class="stat-label" style="color:var(--gold-dark);">DEX</span><input type="number" id="editDex" style="width:100%; background:transparent; border:none; outline:none; text-align:center; font-weight:700; color:var(--ink);"></div>
+                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><span class="stat-label" style="color:var(--gold-dark);">CON</span><input type="number" id="editCon" style="width:100%; background:transparent; border:none; outline:none; text-align:center; font-weight:700; color:var(--ink);"></div>
+                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><span class="stat-label" style="color:var(--gold-dark);">INT</span><input type="number" id="editInt" style="width:100%; background:transparent; border:none; outline:none; text-align:center; font-weight:700; color:var(--ink);"></div>
+                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><span class="stat-label" style="color:var(--gold-dark);">WIS</span><input type="number" id="editWis" style="width:100%; background:transparent; border:none; outline:none; text-align:center; font-weight:700; color:var(--ink);"></div>
+                <div class="stat-box" style="background:rgba(0,0,0,0.1);"><span class="stat-label" style="color:var(--gold-dark);">CHA</span><input type="number" id="editCha" style="width:100%; background:transparent; border:none; outline:none; text-align:center; font-weight:700; color:var(--ink);"></div>
             </div>
-            <textarea id="editDesc" placeholder="Notas..." class="w-full p-2.5 rounded-lg h-20 text-sm resize-none" style="background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink);"></textarea>
-            <div class="flex gap-3 pt-2">
-                <button onclick="closeEditModal()" class="flex-1 py-3 rounded-xl font-heading text-sm uppercase tracking-wider" style="background:rgba(0,0,0,0.2); border:1px solid rgba(0,0,0,0.3); color:rgba(26,15,0,0.6);">Cancelar</button>
-                <button onclick="updateCharacter()" class="flex-1 py-3 rounded-xl font-heading text-sm uppercase tracking-wider" style="background:linear-gradient(135deg,#5c3d0a,#8b6914); border:1px solid var(--gold-dark); color:#f0d080;">Actualizar</button>
+            <textarea id="editDesc" placeholder="Notas..." style="width:100%; padding:9px; border-radius:8px; background:rgba(0,0,0,0.08); border:1px solid rgba(139,105,20,0.4); color:var(--ink); height:70px; resize:none; font-size:13px; outline:none;"></textarea>
+            <div style="display:flex; gap:10px; padding-top:6px;">
+                <button onclick="closeEditModal()" style="flex:1; padding:12px; border-radius:10px; background:rgba(0,0,0,0.15); border:1px solid rgba(0,0,0,0.2); color:rgba(26,15,0,0.5); font-family:'Cinzel',serif; font-size:12px; cursor:pointer; text-transform:uppercase; letter-spacing:0.08em;">Cancelar</button>
+                <button onclick="updateCharacter()" style="flex:1; padding:12px; border-radius:10px; background:linear-gradient(135deg,#5c3d0a,#8b6914); border:1px solid var(--gold-dark); color:#f0d080; font-family:'Cinzel',serif; font-size:12px; cursor:pointer; text-transform:uppercase; letter-spacing:0.08em;">Actualizar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ MODAL BORRAR -->
-<div id="deleteModal" class="fixed inset-0 hidden items-center justify-center z-[60] p-4" style="background:rgba(0,0,0,0.92); backdrop-filter:blur(6px);">
-    <div class="parchment rounded-2xl p-10 max-w-sm w-full text-center" style="border:3px double var(--blood); box-shadow:0 0 80px rgba(139,26,26,0.4);">
-        <div class="text-5xl mb-4">💀</div>
-        <h3 class="font-title text-2xl mb-2" style="color:var(--blood);">¿Sentenciar al Olvido?</h3>
-        <p class="font-body text-sm mb-8" style="color:rgba(26,15,0,0.6);">Esta acción no puede deshacerse.</p>
-        <div class="flex gap-4 justify-center">
-            <button onclick="closeDeleteModal()" class="px-8 py-3 rounded-xl font-heading text-sm uppercase tracking-wider" style="background:rgba(0,0,0,0.15); border:1px solid rgba(0,0,0,0.2); color:rgba(26,15,0,0.6);">Piedad</button>
-            <button id="confirmDeleteBtn" class="px-8 py-3 rounded-xl font-heading text-sm uppercase tracking-wider" style="background:var(--blood); border:1px solid #6b1111; color:#fca5a5; box-shadow:0 0 20px rgba(139,26,26,0.4);">Sentenciar</button>
+<!-- ═══════════════════ MODAL BORRAR ═══════════════════ -->
+<div id="deleteModal" class="modal-overlay" style="background:rgba(0,0,0,0.92);">
+    <div class="parchment" style="border-radius:16px; padding:36px; max-width:320px; width:100%; text-align:center; border:3px double var(--blood); box-shadow:0 0 80px rgba(139,26,26,0.4);">
+        <div style="font-size:44px; margin-bottom:12px;">💀</div>
+        <h3 class="font-title" style="font-size:20px; color:var(--blood); margin-bottom:8px;">¿Sentenciar al Olvido?</h3>
+        <p style="font-size:13px; color:rgba(26,15,0,0.55); margin-bottom:24px;">Esta acción no puede deshacerse.</p>
+        <div style="display:flex; gap:14px; justify-content:center;">
+            <button onclick="closeDeleteModal()" style="padding:10px 24px; border-radius:10px; background:rgba(0,0,0,0.15); border:1px solid rgba(0,0,0,0.2); color:rgba(26,15,0,0.55); font-family:'Cinzel',serif; font-size:12px; cursor:pointer; text-transform:uppercase;">Piedad</button>
+            <button id="confirmDeleteBtn" style="padding:10px 24px; border-radius:10px; background:var(--blood); border:1px solid #6b1111; color:#fca5a5; font-family:'Cinzel',serif; font-size:12px; cursor:pointer; text-transform:uppercase; box-shadow:0 0 20px rgba(139,26,26,0.4);">Sentenciar</button>
         </div>
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ MODAL INICIATIVA -->
-<div id="initiativeModal" class="fixed inset-0 hidden items-center justify-center z-[100] p-4" style="background:rgba(0,0,0,0.75); backdrop-filter:blur(6px);">
-    <div class="parchment rounded-2xl p-8 max-w-xs w-full text-center" style="border:2px solid #6d28d9; box-shadow:0 0 50px rgba(109,40,217,0.3);">
-        <div class="text-3xl mb-2">🎲</div>
-        <h3 id="initModalName" class="font-title text-lg mb-1" style="color:#4c1d95;">Iniciativa</h3>
-        <p class="font-body text-sm mb-4" style="color:rgba(26,15,0,0.5);">Ingresá el resultado de tu tirada</p>
-        <input type="number" id="manualRoll" class="w-full p-4 rounded-2xl text-center text-5xl font-bold outline-none mb-6" style="background:rgba(109,40,217,0.08); border:2px solid #6d28d9; color:#4c1d95;">
-        <div class="flex gap-3">
-            <button onclick="closeInitModal()" class="flex-1 py-3 rounded-xl font-heading text-sm uppercase" style="background:rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0.2); color:rgba(26,15,0,0.5);">Cancelar</button>
-            <button onclick="confirmManualInitiative()" class="flex-1 py-3 rounded-xl font-heading text-sm uppercase" style="background:#4c1d95; border:1px solid #6d28d9; color:#e9d5ff;">Confirmar</button>
+<!-- ═══════════════════ MODAL INICIATIVA ═══════════════════ -->
+<div id="initiativeModal" class="modal-overlay" style="background:rgba(0,0,0,0.75);">
+    <div class="parchment" style="border-radius:16px; padding:28px; max-width:280px; width:100%; text-align:center; border:2px solid #6d28d9; box-shadow:0 0 50px rgba(109,40,217,0.3);">
+        <div style="font-size:28px; margin-bottom:8px;">🎲</div>
+        <h3 id="initModalName" class="font-title" style="font-size:16px; color:#4c1d95; margin-bottom:4px;">Iniciativa</h3>
+        <p style="font-size:12px; color:rgba(26,15,0,0.5); margin-bottom:14px;">Ingresá el resultado de tu tirada</p>
+        <input type="number" id="manualRoll" style="width:100%; padding:14px; border-radius:14px; text-align:center; font-size:44px; font-weight:700; background:rgba(109,40,217,0.08); border:2px solid #6d28d9; color:#4c1d95; outline:none; margin-bottom:18px;">
+        <div style="display:flex; gap:10px;">
+            <button onclick="closeInitModal()" style="flex:1; padding:11px; border-radius:10px; background:rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0.2); color:rgba(26,15,0,0.5); font-family:'Cinzel',serif; font-size:12px; cursor:pointer; text-transform:uppercase;">Cancelar</button>
+            <button onclick="confirmManualInitiative()" style="flex:1; padding:11px; border-radius:10px; background:#4c1d95; border:1px solid #6d28d9; color:#e9d5ff; font-family:'Cinzel',serif; font-size:12px; cursor:pointer; text-transform:uppercase;">Confirmar</button>
         </div>
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ MODAL NARRATIVA IA -->
-<div id="narrativeModal" class="fixed inset-0 hidden items-center justify-center z-[100] p-4" style="background:rgba(0,0,0,0.88); backdrop-filter:blur(10px);">
-    <div class="glass rounded-2xl p-8 max-w-2xl w-full shadow-2xl" style="border-color:rgba(139,92,246,0.4); box-shadow:0 0 60px rgba(139,92,246,0.15);">
-        <div class="flex justify-between items-center mb-5">
-            <h3 class="font-heading text-lg uppercase tracking-widest" style="color:#c4b5fd;">🧙 Dungeon Master IA</h3>
-            <button onclick="closeNarrativeModal()" class="text-white/40 hover:text-white text-xl">✕</button>
+<!-- ═══════════════════ MODAL NARRATIVA IA ═══════════════════ -->
+<div id="narrativeModal" class="modal-overlay" style="background:rgba(0,0,0,0.88);">
+    <div class="glass" style="border-radius:16px; padding:24px; width:100%; max-width:580px; border-color:rgba(139,92,246,0.4); box-shadow:0 0 60px rgba(139,92,246,0.15);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 class="font-heading" style="font-size:14px; text-transform:uppercase; letter-spacing:0.1em; color:#c4b5fd;">🧙 Dungeon Master IA</h3>
+            <button onclick="closeNarrativeModal()" style="background:none; border:none; color:rgba(232,220,200,0.4); font-size:20px; cursor:pointer;">✕</button>
         </div>
-        <div id="narrativeContent" class="font-body text-base leading-relaxed p-5 rounded-xl min-h-[120px]" style="background:rgba(0,0,0,0.4); border:1px solid rgba(139,92,246,0.2); color:#e8dcc8; font-size:17px; line-height:1.8;">
-            <span class="text-white/30 italic">Generando narrativa...</span>
+        <div id="narrativeContent" style="font-family:'Crimson Text',serif; font-size:16px; line-height:1.8; padding:16px; border-radius:10px; min-height:100px; background:rgba(0,0,0,0.4); border:1px solid rgba(139,92,246,0.2); color:#e8dcc8; margin-bottom:14px;">
+            <span style="color:rgba(232,220,200,0.3); font-style:italic;">Generando narrativa...</span>
         </div>
-        <div class="mt-5 flex gap-3">
-            <input type="text" id="narrativeContext" placeholder="Describí la escena (ej: una cripta antigua con trampas)..." class="dm-input flex-1">
-            <button onclick="generateRoom()" class="btn-gold px-6 py-2.5 rounded-xl text-sm">Generar</button>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="narrativeContext" placeholder="Describí la escena..." class="dm-input" style="flex:1;">
+            <button onclick="generateRoom()" class="btn-gold" style="padding:10px 20px; border-radius:10px; font-size:12px; white-space:nowrap;">Generar</button>
         </div>
     </div>
 </div>
 
 <script src="script.js"></script>
 <script>
-// ═══════════════════════════════════════════════════════
-// BRASAS FLOTANTES
-// ═══════════════════════════════════════════════════════
 (function createEmbers() {
-    const count = 18;
-    for (let i = 0; i < count; i++) {
-        const ember = document.createElement('div');
-        ember.className = 'ember';
-        const size   = Math.random() * 3 + 1.5;
-        const left   = Math.random() * 100;
-        const delay  = Math.random() * 12;
-        const dur    = Math.random() * 10 + 8;
-        const drift  = (Math.random() - 0.5) * 120 + 'px';
-        const colors = ['#f97316','#ef4444','#fbbf24','#f59e0b'];
-        const color  = colors[Math.floor(Math.random() * colors.length)];
-        ember.style.cssText = `
-            left: ${left}%;
-            bottom: -10px;
-            width: ${size}px;
-            height: ${size}px;
-            background: ${color};
-            box-shadow: 0 0 ${size*3}px ${color};
-            animation-duration: ${dur}s;
-            animation-delay: ${delay}s;
-            --drift: ${drift};
+    const colors = ['#f97316','#ef4444','#fbbf24','#f59e0b'];
+    for (let i = 0; i < 16; i++) {
+        const e = document.createElement('div');
+        e.className = 'ember';
+        const size = Math.random() * 3 + 1.5;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        e.style.cssText = `
+            left:${Math.random()*100}%; bottom:-10px;
+            width:${size}px; height:${size}px;
+            background:${color}; box-shadow:0 0 ${size*3}px ${color};
+            animation-duration:${Math.random()*10+8}s;
+            animation-delay:${Math.random()*12}s;
+            --drift:${(Math.random()-0.5)*120}px;
         `;
-        document.body.appendChild(ember);
+        document.body.appendChild(e);
     }
 })();
 </script>

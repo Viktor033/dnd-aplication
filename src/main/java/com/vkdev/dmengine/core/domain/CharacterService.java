@@ -76,7 +76,11 @@ public class CharacterService {
         CharacterEntity character = findById(id);
         character.setIsDead(!Boolean.TRUE.equals(character.getIsDead()));
         if (Boolean.TRUE.equals(character.getIsDead())) {
+            // Al morir: HP cae a 0
             character.setCurrentHp(0);
+        } else {
+            // Al resucitar: se restaura con 1 HP (regla de D&D: vuelve estabilizado con 1 HP)
+            character.setCurrentHp(1);
         }
         return characterRepository.save(character);
     }

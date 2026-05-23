@@ -12,7 +12,8 @@ let useBackend = true; // Se detecta automáticamente al cargar
 // --- ESTADO GLOBAL ---
 let allCharacters = [];
 let combatOrder = [];
-let currentInitId = null;
+let currentInitId = null;  // ID activo en el modal de iniciativa
+let currentDeleteId = null; // ID activo en el modal de borrado (separado para evitar conflictos)
 
 // --- DICCIONARIO DE IMÁGENES ---
 const raceGallery = {
@@ -228,6 +229,58 @@ async function purgeDead() {
 }
 
 // =============================================
+// HP EN TIEMPO REAL
+// =============================================
+
+async function quickHpChange(id, delta) {
+    await _applyHpDelta(id, delta);
+}
+
+async function applyCustomHp(id, sign) {
+    const input = document.getElementById(`hpInput-${id}`);
+    const amount = parseInt(input?.value);
+    if (!amount || amount <= 0) return;
+    input.value = '';
+    await _applyHpDelta(id, sign * amount);
+}
+
+async function _applyHpDelta(id, delta) {
+    const index = allCharacters.findIndex(c => c.id === id);
+    if (index === -1) return;
+
+    if (useBackend) {
+        try {
+            const res = await fetch(`${API_BASE}/characters/${id}/hp`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ delta })
+            });
+            if (!res.ok) return;
+            allCharacters[index] = await res.json();
+        } catch (e) {
+            _applyHpDeltaLocal(index, delta);
+        }
+    } else {
+        _applyHpDeltaLocal(index, delta);
+        syncLocal();
+    }
+
+    const char = allCharacters[index];
+    const verb = delta > 0 ? `curado ${delta} HP ❤️‍🩹` : `recibido ${Math.abs(delta)} de daño ⚔️`;
+    addLog(`${char.name} ha ${verb}. HP: ${char.currentHp ?? char.hp}/${char.maxHp ?? char.hp}`, delta > 0 ? 'amber' : 'red');
+    renderAll();
+}
+
+function _applyHpDeltaLocal(index, delta) {
+    const char = allCharacters[index];
+    const max = char.maxHp || char.hp || 0;
+    let current = char.currentHp !== null && char.currentHp !== undefined ? char.currentHp : char.hp;
+    current = Math.max(0, Math.min(max, current + delta));
+    char.currentHp = current;
+    if (current === 0) char.isDead = true;
+}
+
+// =============================================
 // GENERACIÓN DE NARRATIVA CON IA
 // =============================================
 
@@ -273,6 +326,11 @@ function renderAll() {
     updateCounters(counts);
 }
 
+function getModifier(score) {
+    const mod = Math.floor((score - 10) / 2);
+    return mod >= 0 ? `+${mod}` : `${mod}`;
+}
+
 function createCard(char) {
     const charData = JSON.stringify(char).replace(/"/g, '&quot;');
     const raceData = raceGallery[char.race] || null;
@@ -280,8 +338,9 @@ function createCard(char) {
     const deadClass = char.isDead ? 'opacity-40 grayscale' : '';
     const displayHp = char.currentHp !== undefined && char.currentHp !== null ? char.currentHp : char.hp;
     const maxHp = char.maxHp || char.hp || 0;
-    const hpPercent = maxHp > 0 ? Math.round((displayHp / maxHp) * 100) : 0;
+    const hpPercent = maxHp > 0 ? Math.max(0, Math.round((displayHp / maxHp) * 100)) : 0;
     const hpColor = hpPercent > 60 ? 'bg-green-600' : hpPercent > 30 ? 'bg-yellow-500' : 'bg-red-600';
+    const statusBadge = char.status ? `<span class="inline-block text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-900/60 text-purple-200 border border-purple-500/40 ml-1">${char.status}</span>` : '';
 
     return `
         <div id="card-${char.id}" class="parchment p-4 rounded-xl shadow-lg border-l-8 ${getBorderColor(char.type)} group ${deadClass}" data-name="${char.name.toLowerCase()}">
@@ -290,7 +349,7 @@ function createCard(char) {
                      style="background-image: url('${raceImg}')"></div>
                 <div class="flex-1">
                     <div class="flex justify-between items-start">
-                        <span class="font-bold text-lg medieval-font leading-tight">${char.name}</span>
+                        <span class="font-bold text-lg medieval-font leading-tight">${char.name}${statusBadge}</span>
                         <span class="text-red-800 font-bold text-lg leading-none">${displayHp}/${maxHp}</span>
                     </div>
                     <div class="health-bar-bg mt-1">
@@ -300,6 +359,17 @@ function createCard(char) {
                         ${char.gender === 'F' ? '♀' : '♂'} ${char.race || ''} ${char.charClass || ''}
                     </small>
                 </div>
+            </div>
+
+            <!-- Controles de HP en tiempo real -->
+            <div class="flex items-center gap-1 mb-2 bg-black/10 rounded-lg p-1">
+                <button onclick="quickHpChange(${char.id}, -1)"  class="bg-red-800 hover:bg-red-700 text-white text-xs font-bold w-6 h-6 rounded transition-colors flex items-center justify-center" title="-1 HP">-1</button>
+                <button onclick="quickHpChange(${char.id}, -5)"  class="bg-red-900 hover:bg-red-800 text-white text-[9px] font-bold w-6 h-6 rounded transition-colors flex items-center justify-center" title="-5 HP">-5</button>
+                <input  type="number" id="hpInput-${char.id}" placeholder="HP" class="flex-1 bg-white/30 border border-black/20 rounded text-center text-xs font-bold text-amber-900 h-6 outline-none min-w-0">
+                <button onclick="applyCustomHp(${char.id}, -1)" class="bg-orange-700 hover:bg-orange-600 text-white text-[9px] font-bold px-1.5 h-6 rounded transition-colors" title="Aplicar daño">DMG</button>
+                <button onclick="applyCustomHp(${char.id}, +1)" class="bg-green-700  hover:bg-green-600  text-white text-[9px] font-bold px-1.5 h-6 rounded transition-colors" title="Aplicar curación">CUR</button>
+                <button onclick="quickHpChange(${char.id}, +5)"  class="bg-green-800 hover:bg-green-700 text-white text-[9px] font-bold w-6 h-6 rounded transition-colors flex items-center justify-center" title="+5 HP">+5</button>
+                <button onclick="quickHpChange(${char.id}, +1)"  class="bg-green-600 hover:bg-green-500 text-white text-xs font-bold w-6 h-6 rounded transition-colors flex items-center justify-center" title="+1 HP">+1</button>
             </div>
 
             <div class="flex justify-between items-center mb-2">
@@ -313,12 +383,12 @@ function createCard(char) {
             </div>
 
             <div class="grid grid-cols-6 gap-1 text-[9px] mb-2 font-bold text-center">
-                <div class="stat-box">ST<br>${char.str}</div>
-                <div class="stat-box">DX<br>${char.dex}</div>
-                <div class="stat-box">CN<br>${char.con}</div>
-                <div class="stat-box">IN<br>${char.intel}</div>
-                <div class="stat-box">WS<br>${char.wis}</div>
-                <div class="stat-box">CH<br>${char.cha}</div>
+                <div class="stat-box">ST<br>${char.str}<span class="text-[8px] text-amber-700">${getModifier(char.str||10)}</span></div>
+                <div class="stat-box">DX<br>${char.dex}<span class="text-[8px] text-amber-700">${getModifier(char.dex||10)}</span></div>
+                <div class="stat-box">CN<br>${char.con}<span class="text-[8px] text-amber-700">${getModifier(char.con||10)}</span></div>
+                <div class="stat-box">IN<br>${char.intel}<span class="text-[8px] text-amber-700">${getModifier(char.intel||10)}</span></div>
+                <div class="stat-box">WS<br>${char.wis}<span class="text-[8px] text-amber-700">${getModifier(char.wis||10)}</span></div>
+                <div class="stat-box">CH<br>${char.cha}<span class="text-[8px] text-amber-700">${getModifier(char.cha||10)}</span></div>
             </div>
             <p class="text-[10px] italic leading-tight text-gray-800 border-t border-black/5 pt-1">
                 <b>${char.background || 'Nota'}:</b> ${char.description || ''}
@@ -433,9 +503,9 @@ function updateRacePreview(containerId, race) {
 }
 
 function openDeleteModal(id) {
-    currentInitId = id;
+    currentDeleteId = id;
     document.getElementById('deleteModal').classList.remove('hidden');
-    document.getElementById('confirmDeleteBtn').onclick = () => deleteChar(currentInitId);
+    document.getElementById('confirmDeleteBtn').onclick = () => deleteChar(currentDeleteId);
 }
 
 function updateCounters(counts) {

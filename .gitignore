@@ -1,0 +1,22 @@
+# ========================
+# DM Engine — .gitignore
+# ========================
+
+# Variables de entorno (NUNCA subir)
+.env
+*.env.local
+
+# Maven
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db

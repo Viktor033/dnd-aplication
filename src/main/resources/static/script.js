@@ -505,11 +505,12 @@ function updateRacePreview(containerId, race) {
         ? document.getElementById('charGender').value
         : document.getElementById('editGender').value;
     const container = document.getElementById(containerId);
+    if (!container) return;
     if (race && raceGallery[race]) {
         container.style.backgroundImage = `url('${raceGallery[race][gender] || raceGallery[race]["M"]}')`;
-        container.classList.remove('hidden');
+        container.style.display = 'block';
     } else {
-        container.classList.add('hidden');
+        container.style.display = 'none';
     }
 }
 
@@ -536,9 +537,11 @@ function filterList(listId, query) {
 
 function resetInvocacionForm() {
     ['charName', 'charClass', 'charBackground', 'charDesc'].forEach(id => {
-        document.getElementById(id).value = "";
+        const el = document.getElementById(id);
+        if (el) el.value = "";
     });
-    document.getElementById('racePreview').classList.add('hidden');
+    const preview = document.getElementById('racePreview');
+    if (preview) preview.style.display = 'none';
 }
 
 function toggleDiceRoller() { document.getElementById('dicePanel').classList.toggle('hidden'); }
@@ -547,3 +550,32 @@ function closeEditModal()    { document.getElementById('editModal').style.displa
 function closeDeleteModal()  { document.getElementById('deleteModal').style.display = 'none'; }
 function closeInitModal()    { document.getElementById('initiativeModal').style.display = 'none'; }
 function clearInitiative()   { combatOrder = []; currentTurnIndex = 0; renderInitiative(); }
+function openDeleteModal(id) {
+    currentInitId = id;
+    document.getElementById('deleteModal').style.display = 'flex';
+    document.getElementById('confirmDeleteBtn').onclick = () => deleteChar(currentInitId);
+}
+
+// =============================================
+// RESPONSIVE — TABS MÓVIL Y SIDEBAR DRAWER
+// =============================================
+
+function showTab(sectionId, tabId) {
+    // Solo activo en móvil (< 768px)
+    if (window.innerWidth >= 768) return;
+    document.querySelectorAll('.col-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
+    const section = document.getElementById(sectionId);
+    if (section) section.classList.add('active');
+    const btn = document.getElementById(tabId);
+    if (btn) btn.classList.add('active-tab');
+}
+
+function toggleSidebar() {
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('sidebar-overlay');
+    if (!sidebar) return;
+    const isOpen = sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', !isOpen);
+    overlay.style.display = isOpen ? 'none' : 'block';
+}
