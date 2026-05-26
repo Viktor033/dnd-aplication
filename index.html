@@ -47,7 +47,16 @@
 
     <header class="flex justify-between items-center mb-8 glass p-4 shadow-2xl">
         <h1 class="text-3xl md:text-5xl medieval-font text-amber-500 font-bold uppercase tracking-tighter drop-shadow-lg">Dungeon Master Engine <span class="text-sm font-normal text-white/50 block md:inline md:ml-4 tracking-widest">v5.5 ELITE</span></h1>
-        <div class="flex gap-4">
+        <div class="flex items-center gap-4">
+            <!-- SaaS Session Info / Actions -->
+            <div id="saasHeaderInfo" class="hidden md:flex items-center gap-3 bg-black/40 px-4 py-2 rounded-xl border border-white/10 text-xs">
+                <span id="saasUserEmail" class="text-white/60 font-bold"></span>
+                <span id="saasUserTier" class="bg-amber-600/20 text-amber-400 px-2.5 py-0.5 rounded-full border border-amber-500/30 font-bold uppercase tracking-wider text-[10px]"></span>
+                <button onclick="openPricingModal()" id="saasUpgradeBtn" class="bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-900 font-bold px-3 py-1 rounded-lg transition-transform hover:scale-105">⚡ UPGRADE</button>
+                <button onclick="handleLogout()" class="text-white/40 hover:text-red-400 transition-colors">Salir</button>
+            </div>
+            <button id="saasLoginBtn" onclick="openAuthModal()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all transform hover:scale-105">🔓 INICIAR SESIÓN</button>
+
             <button onclick="generateRoom()" class="bg-purple-700 hover:bg-purple-600 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Generar Narrativa IA">🧙</button>
             <button onclick="toggleDiceRoller()" class="bg-amber-600 hover:bg-amber-500 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Lanzar Dados">🎲</button>
             <button onclick="toggleLog()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Ver Bitácora">📜</button>
@@ -197,6 +206,111 @@
         </div>
         <div id="logEntries" class="space-y-3 overflow-y-auto h-[calc(100%-120px)] pr-2 scroll-custom">
             <p class="text-xs text-white/30 italic text-center">Iniciando sesión de campaña...</p>
+        </div>
+    </div>
+
+    <!-- MODAL DE AUTENTICACIÓN SAAS (PREMIUM) -->
+    <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+        <div class="parchment p-8 max-w-md w-full shadow-2xl rounded-2xl border-8 border-double border-[#3d2b1f] relative overflow-hidden">
+            <h3 id="authTitle" class="text-3xl medieval-font font-bold mb-6 text-amber-900 border-b-2 border-amber-800/20 pb-2 text-center">Gremio de Héroes</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-bold text-amber-900/50 uppercase ml-1">Correo Electrónico</label>
+                    <input type="email" id="authEmail" placeholder="nombre@reino.com" class="w-full p-3 bg-white/40 border border-amber-900/20 rounded-xl font-bold text-amber-900 focus:outline-none placeholder:text-amber-900/30">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-amber-900/50 uppercase ml-1">Contraseña</label>
+                    <input type="password" id="authPassword" placeholder="••••••••" class="w-full p-3 bg-white/40 border border-amber-900/20 rounded-xl font-bold text-amber-900 focus:outline-none placeholder:text-amber-900/30">
+                </div>
+                
+                <div id="authErrorMsg" class="text-red-700 text-xs font-bold text-center hidden"></div>
+
+                <div class="pt-2">
+                    <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="w-full bg-amber-800 hover:bg-amber-700 text-white font-bold py-4 rounded-xl shadow-lg transition-colors medieval-font uppercase tracking-widest">Entrar al Gremio</button>
+                </div>
+                
+                <p class="text-center text-xs text-amber-900/60 font-bold mt-4">
+                    <span id="authToggleText">¿Eres un nuevo recluta?</span> 
+                    <a href="#" onclick="toggleAuthMode()" id="authToggleBtn" class="text-amber-900 underline hover:text-amber-700">Regístrate aquí</a>
+                </p>
+                <div class="flex justify-center pt-2">
+                    <button onclick="closeAuthModal()" class="text-xs text-amber-900/40 hover:text-amber-900 font-bold uppercase tracking-wider">RETROCEDER</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE SUSCRIPCIÓN SAAS (PREMIUM) -->
+    <div id="pricingModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+        <div class="parchment p-8 max-w-4xl w-full shadow-2xl rounded-2xl border-8 border-double border-[#3d2b1f] overflow-y-auto max-h-[90vh]">
+            <h3 class="text-4xl medieval-font font-bold mb-2 text-center text-amber-900">Forja tu Suscripción</h3>
+            <p class="text-center text-sm italic text-amber-900/70 mb-8 font-bold">Desbloquea los poderes prohibidos de la IA del Dungeon Master</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Aventurero -->
+                <div class="bg-white/30 border border-amber-900/10 p-6 rounded-xl flex flex-col justify-between hover:scale-[1.02] transition-transform shadow-inner">
+                    <div>
+                        <h4 class="medieval-font text-xl text-amber-950 font-bold text-center">Aventurero</h4>
+                        <p class="text-center text-[10px] uppercase font-bold text-amber-900/50 mb-4">Plan Inicial</p>
+                        <div class="text-center mb-6">
+                            <span class="text-3xl font-bold text-amber-950">$0</span>
+                            <span class="text-xs text-amber-900/60">/mes</span>
+                        </div>
+                        <ul class="space-y-2 text-xs font-bold text-amber-950/80 mb-6">
+                            <li class="flex items-center gap-2">🟢 Máximo 5 héroes activos</li>
+                            <li class="flex items-center gap-2">🟢 Tirador de dados e bitácora</li>
+                            <li class="flex items-center gap-2">🟡 IA en modo Demostración</li>
+                            <li class="flex items-center gap-2">🔴 Sin multijugador WebSockets</li>
+                        </ul>
+                    </div>
+                    <button class="w-full bg-slate-700 text-white py-3 rounded-lg font-bold text-xs uppercase" disabled>Plan Activo</button>
+                </div>
+
+                <!-- Dungeon Master -->
+                <div class="bg-amber-100/50 border-2 border-amber-800 p-6 rounded-xl flex flex-col justify-between hover:scale-[1.02] transition-transform shadow-lg relative">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-amber-800 text-white font-bold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">POPULAR</div>
+                    <div>
+                        <h4 class="medieval-font text-xl text-amber-900 font-bold text-center mt-2">Dungeon Master</h4>
+                        <p class="text-center text-[10px] uppercase font-bold text-amber-800/80 mb-4">Recomendado</p>
+                        <div class="text-center mb-6">
+                            <span class="text-3xl font-bold text-amber-900">$9.99</span>
+                            <span class="text-xs text-amber-900/60">/mes</span>
+                        </div>
+                        <ul class="space-y-2 text-xs font-bold text-amber-900/90 mb-6">
+                            <li class="flex items-center gap-2">🔮 <b>Héroes ilimitados</b></li>
+                            <li class="flex items-center gap-2">🔮 <b>IA real Claude 3.5 Sonnet</b></li>
+                            <li class="flex items-center gap-2">🔮 <b>Auto-Forjado Inteligente</b></li>
+                            <li class="flex items-center gap-2">🔮 Narrativa de combate reactiva</li>
+                            <li class="flex items-center gap-2">🔴 Sin multijugador WebSockets</li>
+                        </ul>
+                    </div>
+                    <button onclick="simulateUpgrade('DUNGEON_MASTER')" class="w-full bg-amber-800 hover:bg-amber-700 text-white py-3 rounded-lg font-bold text-xs uppercase transition-colors shadow">PROBAR MOCK PRO</button>
+                </div>
+
+                <!-- Leyenda -->
+                <div class="bg-purple-900/10 border border-purple-900/30 p-6 rounded-xl flex flex-col justify-between hover:scale-[1.02] transition-transform shadow-inner">
+                    <div>
+                        <h4 class="medieval-font text-xl text-purple-950 font-bold text-center">Leyenda</h4>
+                        <p class="text-center text-[10px] uppercase font-bold text-purple-900/50 mb-4">Plan definitivo</p>
+                        <div class="text-center mb-6">
+                            <span class="text-3xl font-bold text-purple-950">$24.99</span>
+                            <span class="text-xs text-purple-950/60">/mes</span>
+                        </div>
+                        <ul class="space-y-2 text-xs font-bold text-purple-950/80 mb-6">
+                            <li class="flex items-center gap-2">✨ Todo lo del plan DM Pro</li>
+                            <li class="flex items-center gap-2">✨ <b>WebSockets Multijugador</b></li>
+                            <li class="flex items-center gap-2">✨ Consultas IA ilimitadas</li>
+                            <li class="flex items-center gap-2">✨ Generador retrato de IA</li>
+                            <li class="flex items-center gap-2">✨ Audio interactivo 3D</li>
+                        </ul>
+                    </div>
+                    <button onclick="simulateUpgrade('LEYENDA')" class="w-full bg-purple-800 hover:bg-purple-700 text-white py-3 rounded-lg font-bold text-xs uppercase transition-colors shadow">PROBAR MOCK ELITE</button>
+                </div>
+            </div>
+            
+            <div class="flex justify-center pt-8 border-t border-amber-900/10 mt-8">
+                <button onclick="closePricingModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold text-xs uppercase transition-colors">RETROCEDER</button>
+            </div>
         </div>
     </div>
 

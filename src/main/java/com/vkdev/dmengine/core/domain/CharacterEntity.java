@@ -47,9 +47,17 @@ public class CharacterEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private UserEntity user;
+
     public CharacterEntity() {}
 
     // --- Getters y Setters ---
+
+    public UserEntity getUser() { return user; }
+    public void setUser(UserEntity user) { this.user = user; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

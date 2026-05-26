@@ -5,7 +5,6 @@
  */
 
 // --- CONFIGURACIÓN ---
-// Ruta relativa: funciona sin importar el puerto o dominio donde corra el servidor
 const API_BASE = '/api';
 let useBackend = true; // Se detecta automáticamente al cargar
 
@@ -13,7 +12,9 @@ let useBackend = true; // Se detecta automáticamente al cargar
 let allCharacters = [];
 let combatOrder = [];
 let currentInitId = null;  // ID activo en el modal de iniciativa
-let currentDeleteId = null; // ID activo en el modal de borrado (separado para evitar conflictos)
+let currentDeleteId = null; // ID activo en el modal de borrado
+let currentUser = null;     // Guardará el usuario logueado { email, tier }
+let authMode = 'login';     // 'login' o 'register'
 
 // --- DICCIONARIO DE IMÁGENES ---
 const raceGallery = {
@@ -33,9 +34,198 @@ const raceGallery = {
 };
 
 // =============================================
+// AUXILIARES Y AUTENTICACIÓN SAAS
+// =============================================
+
+async function authFetch(url, options = {}) {
+    options.headers = options.headers || {};
+    const token = localStorage.getItem('dm_saas_token');
+    if (token) {
+        options.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return fetch(url, options);
+}
+
+function decodeToken(token) {
+    if (!token) return null;
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch(e) {
+        return null;
+    }
+}
+
+function updateSaasUI() {
+    const token = localStorage.getItem('dm_saas_token');
+    const payload = decodeToken(token);
+    if (payload) {
+        currentUser = { email: payload.sub, tier: payload.tier };
+        document.getElementById('saasUserEmail').innerText = payload.sub;
+        document.getElementById('saasUserTier').innerText = translateTier(payload.tier);
+        document.getElementById('saasHeaderInfo').classList.remove('hidden');
+        document.getElementById('saasLoginBtn').classList.add('hidden');
+        
+        if (payload.tier === 'LEYENDA') {
+            document.getElementById('saasUpgradeBtn').classList.add('hidden');
+        } else {
+            document.getElementById('saasUpgradeBtn').classList.remove('hidden');
+        }
+    } else {
+        currentUser = null;
+        document.getElementById('saasHeaderInfo').classList.add('hidden');
+        document.getElementById('saasLoginBtn').classList.remove('hidden');
+    }
+}
+
+function translateTier(tier) {
+    if (tier === 'AVENTURERO') return 'Aventurero ⚔️';
+    if (tier === 'DUNGEON_MASTER') return 'PRO 🔮';
+    if (tier === 'LEYENDA') return 'Leyenda ✨';
+    return tier;
+}
+
+function openAuthModal() {
+    authMode = 'login';
+    document.getElementById('authTitle').innerText = "Gremio de Héroes";
+    document.getElementById('authToggleText').innerText = "¿Eres un nuevo recluta?";
+    document.getElementById('authToggleBtn').innerText = "Regístrate aquí";
+    document.getElementById('authSubmitBtn').innerText = "Entrar al Gremio";
+    document.getElementById('authEmail').value = "";
+    document.getElementById('authPassword').value = "";
+    document.getElementById('authErrorMsg').classList.add('hidden');
+    document.getElementById('authModal').classList.remove('hidden');
+}
+
+function closeAuthModal() {
+    document.getElementById('authModal').classList.add('hidden');
+}
+
+function toggleAuthMode() {
+    document.getElementById('authErrorMsg').classList.add('hidden');
+    if (authMode === 'login') {
+        authMode = 'register';
+        document.getElementById('authTitle').innerText = "Nuevo Reclutamiento";
+        document.getElementById('authToggleText').innerText = "¿Ya eres miembro?";
+        document.getElementById('authToggleBtn').innerText = "Inicia sesión aquí";
+        document.getElementById('authSubmitBtn').innerText = "Forjar Cuenta";
+    } else {
+        authMode = 'login';
+        document.getElementById('authTitle').innerText = "Gremio de Héroes";
+        document.getElementById('authToggleText').innerText = "¿Eres un nuevo recluta?";
+        document.getElementById('authToggleBtn').innerText = "Regístrate aquí";
+        document.getElementById('authSubmitBtn').innerText = "Entrar al Gremio";
+    }
+}
+
+async function handleAuthSubmit() {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value.trim();
+    const errorDiv = document.getElementById('authErrorMsg');
+
+    if (!email || !password) {
+        errorDiv.innerText = "¡Por la barba de Odín! Rellena todos los campos.";
+        errorDiv.classList.remove('hidden');
+        return;
+    }
+
+    const url = `${API_BASE}/auth/${authMode}`;
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            errorDiv.innerText = data.message || "Error al autenticar";
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+
+        if (authMode === 'login') {
+            localStorage.setItem('dm_saas_token', data.token);
+            updateSaasUI();
+            closeAuthModal();
+            await loadCharacters();
+            addLog(`Bienvenido, ${email}!`, 'blue');
+        } else {
+            alert("¡Cuenta forjada con éxito! Ahora puedes iniciar sesión.");
+            authMode = 'login';
+            toggleAuthMode();
+        }
+    } catch (e) {
+        errorDiv.innerText = "No se pudo conectar con el servidor.";
+        errorDiv.classList.remove('hidden');
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('dm_saas_token');
+    updateSaasUI();
+    loadCharacters();
+    addLog("Has abandonado el gremio", 'red');
+}
+
+function openPricingModal() {
+    document.getElementById('pricingModal').classList.remove('hidden');
+}
+
+function closePricingModal() {
+    document.getElementById('pricingModal').classList.add('hidden');
+}
+
+async function simulateUpgrade(tier) {
+    const token = localStorage.getItem('dm_saas_token');
+    if (!token) {
+        alert("¡Por favor, inicia sesión antes de forjar tu suscripción!");
+        closePricingModal();
+        openAuthModal();
+        return;
+    }
+
+    const payload = decodeToken(token);
+    if (!payload) return;
+
+    try {
+        const res = await fetch(`${API_BASE}/auth/upgrade-simulation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: payload.sub, tier })
+        });
+
+        const data = await res.json();
+        if (!res.ok) return alert(data.message || "Error en upgrade");
+
+        localStorage.setItem('dm_saas_token', data.token);
+        updateSaasUI();
+        closePricingModal();
+        await loadCharacters();
+
+        // Mostrar animación mágica de LEVEL UP
+        const levelUpModal = document.getElementById('levelUpModal');
+        levelUpModal.querySelector('p').innerText = "Tu plan ha ascendido a " + translateTier(tier) + "!";
+        levelUpModal.classList.remove('hidden');
+        setTimeout(() => {
+            levelUpModal.classList.add('hidden');
+        }, 2500);
+
+        addLog(`¡Upgrade exitoso al plan ${tier}!`, 'amber');
+    } catch (e) {
+        alert("No se pudo conectar con el servidor para simular el pago.");
+    }
+}
+
+// =============================================
 // INICIALIZACIÓN
 // =============================================
 window.onload = async () => {
+    updateSaasUI();
     await loadCharacters();
     addLog("Motor Elite cargado", 'blue');
 };
@@ -46,15 +236,15 @@ window.onload = async () => {
 
 async function loadCharacters() {
     try {
-        const res = await fetch(`${API_BASE}/characters`);
-        if (!res.ok) throw new Error('Backend no disponible');
+        const res = await authFetch(`${API_BASE}/characters`);
+        if (!res.ok) throw new Error('Backend no disponible o no autorizado');
         allCharacters = await res.json();
         useBackend = true;
         addLog("Conectado al servidor 🟢", 'blue');
     } catch (e) {
         useBackend = false;
         allCharacters = JSON.parse(localStorage.getItem('dm_engine_chars')) || [];
-        addLog("Modo offline — usando localStorage 🟡", 'amber');
+        addLog("Modo offline o desautorizado — usando localStorage 🟡", 'amber');
     }
     renderAll();
 }
@@ -93,7 +283,7 @@ async function saveCharacter() {
 
     if (useBackend) {
         try {
-            const res = await fetch(`${API_BASE}/characters`, {
+            const res = await authFetch(`${API_BASE}/characters`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(character)
@@ -143,7 +333,7 @@ async function updateCharacter() {
 
     if (useBackend) {
         try {
-            const res = await fetch(`${API_BASE}/characters/${id}`, {
+            const res = await authFetch(`${API_BASE}/characters/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updated)
@@ -167,7 +357,7 @@ async function updateCharacter() {
 async function deleteChar(id) {
     if (useBackend) {
         try {
-            const res = await fetch(`${API_BASE}/characters/${id}`, { method: 'DELETE' });
+            const res = await authFetch(`${API_BASE}/characters/${id}`, { method: 'DELETE' });
             if (!res.ok) return alert("Error al eliminar");
         } catch (e) {
             addLog("Error al eliminar del servidor", 'red');
@@ -187,11 +377,10 @@ async function toggleDeath(id) {
 
     if (useBackend) {
         try {
-            const res = await fetch(`${API_BASE}/characters/${id}/toggle-death`, { method: 'PATCH' });
+            const res = await authFetch(`${API_BASE}/characters/${id}/toggle-death`, { method: 'PATCH' });
             if (!res.ok) return;
             allCharacters[index] = await res.json();
         } catch (e) {
-            // fallback local
             allCharacters[index].isDead = !allCharacters[index].isDead;
         }
     } else {
@@ -211,7 +400,7 @@ async function purgeDead() {
 
     if (useBackend) {
         try {
-            const res = await fetch(`${API_BASE}/characters/purge-dead`, { method: 'DELETE' });
+            const res = await authFetch(`${API_BASE}/characters/purge-dead`, { method: 'DELETE' });
             if (res.ok) {
                 const data = await res.json();
                 addLog(data.message, 'red');
@@ -250,7 +439,7 @@ async function _applyHpDelta(id, delta) {
 
     if (useBackend) {
         try {
-            const res = await fetch(`${API_BASE}/characters/${id}/hp`, {
+            const res = await authFetch(`${API_BASE}/characters/${id}/hp`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ delta })
@@ -291,7 +480,14 @@ async function generateRoom() {
     addLog("Consultando al Dungeon Master IA...", 'purple');
 
     try {
-        const res = await fetch(`${API_BASE}/campaign/generate-room?context=${encodeURIComponent(context)}`);
+        const res = await authFetch(`${API_BASE}/campaign/generate-room?context=${encodeURIComponent(context)}`);
+        
+        if (res.status === 403) {
+            alert("🔒 ¡Alto ahí, Aventurero! La IA real de Claude requiere el plan Dungeon Master o Leyenda.");
+            openPricingModal();
+            return;
+        }
+
         if (!res.ok) throw new Error();
         const data = await res.json();
         addLog("🎭 DM: " + data.narrative, 'purple');

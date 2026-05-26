@@ -19,20 +19,52 @@ public class CharacterService {
         this.characterRepository = characterRepository;
     }
 
+    /**
+     * Obtiene el usuario autenticado desde el contexto de seguridad.
+     */
+    private UserEntity getAuthenticatedUser() {
+        org.springframework.security.core.Authentication auth = 
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserEntity) {
+            return (UserEntity) auth.getPrincipal();
+        }
+        throw new RuntimeException("Acceso denegado: Usuario no autenticado");
+    }
+
     public List<CharacterEntity> findAll() {
-        return characterRepository.findAll();
+        UserEntity user = getAuthenticatedUser();
+        return characterRepository.findByUser(user);
     }
 
     public List<CharacterEntity> findByType(String type) {
-        return characterRepository.findByType(type);
+        UserEntity user = getAuthenticatedUser();
+        return characterRepository.findByUserAndType(user, type);
     }
 
     public CharacterEntity findById(Long id) {
-        return characterRepository.findById(id)
+        UserEntity user = getAuthenticatedUser();
+        CharacterEntity character = characterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Personaje con id " + id + " no encontrado"));
+        
+        if (character.getUser() == null || !character.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Acceso denegado: No tienes permisos para ver este personaje");
+        }
+        return character;
     }
 
     public CharacterEntity save(CharacterEntity character) {
+        UserEntity user = getAuthenticatedUser();
+
+        // Enforce SaaS Tier 1 limit: Aventurero is limited to 5 active (non-dead) characters
+        if (user.getSubscriptionTier() == SubscriptionTier.AVENTURERO) {
+            long activeCount = characterRepository.countByUserAndIsDead(user, false);
+            if (activeCount >= 5) {
+                throw new RuntimeException("Límite excedido: El plan Aventurero solo permite hasta 5 personajes activos.");
+            }
+        }
+
+        character.setUser(user);
+
         // Si no tiene isDead seteado, inicializarlo en false
         if (character.getIsDead() == null) {
             character.setIsDead(false);
@@ -46,7 +78,7 @@ public class CharacterService {
     }
 
     public CharacterEntity update(Long id, CharacterEntity updated) {
-        CharacterEntity existing = findById(id);
+        CharacterEntity existing = findById(id); // findById ya valida la propiedad del usuario
         existing.setName(updated.getName());
         existing.setType(updated.getType());
         existing.setRace(updated.getRace());
@@ -73,7 +105,7 @@ public class CharacterService {
      * Alterna el estado de muerte de un personaje.
      */
     public CharacterEntity toggleDeath(Long id) {
-        CharacterEntity character = findById(id);
+        CharacterEntity character = findById(id); // findById ya valida la propiedad del usuario
         character.setIsDead(!Boolean.TRUE.equals(character.getIsDead()));
         if (Boolean.TRUE.equals(character.getIsDead())) {
             // Al morir: HP cae a 0
@@ -90,7 +122,7 @@ public class CharacterService {
      * Valor positivo = curación, negativo = daño.
      */
     public CharacterEntity applyHpChange(Long id, int delta) {
-        CharacterEntity character = findById(id);
+        CharacterEntity character = findById(id); // findById ya valida la propiedad del usuario
         int newHp = (character.getCurrentHp() != null ? character.getCurrentHp() : 0) + delta;
         newHp = Math.max(0, Math.min(newHp, character.getMaxHp() != null ? character.getMaxHp() : newHp));
         character.setCurrentHp(newHp);
@@ -99,17 +131,16 @@ public class CharacterService {
     }
 
     public void deleteById(Long id) {
-        if (!characterRepository.existsById(id)) {
-            throw new RuntimeException("Personaje con id " + id + " no encontrado");
-        }
-        characterRepository.deleteById(id);
+        CharacterEntity character = findById(id); // findById ya valida la propiedad del usuario
+        characterRepository.delete(character);
     }
 
     /**
-     * Elimina todos los personajes marcados como muertos.
+     * Elimina todos los personajes marcados como muertos del usuario actual.
      */
     public int purgeDeadCharacters() {
-        List<CharacterEntity> dead = characterRepository.findByIsDead(true);
+        UserEntity user = getAuthenticatedUser();
+        List<CharacterEntity> dead = characterRepository.findByUserAndIsDead(user, true);
         characterRepository.deleteAll(dead);
         return dead.size();
     }
