@@ -226,6 +226,18 @@ async function simulateUpgrade(tier) {
 // =============================================
 window.onload = async () => {
     updateSaasUI();
+    
+    // Cargar estado de la barra lateral de invocación
+    const isHidden = localStorage.getItem('dm_invocation_hidden') === 'true';
+    const panel = document.getElementById('invocationPanel');
+    if (panel) {
+        if (isHidden) {
+            panel.classList.add('hidden');
+        } else {
+            panel.classList.remove('hidden');
+        }
+    }
+    
     await loadCharacters();
     addLog("Motor Elite cargado", 'blue');
 };
@@ -743,6 +755,14 @@ window.onscroll = function () {
 
 function toggleDiceRoller() { document.getElementById('dicePanel').classList.toggle('hidden'); }
 function toggleLog()         { document.getElementById('combatLogPanel').classList.toggle('hidden'); }
+function toggleInvocationPanel() {
+    const panel = document.getElementById('invocationPanel');
+    if (panel) {
+        panel.classList.toggle('hidden');
+        const isHidden = panel.classList.contains('hidden');
+        localStorage.setItem('dm_invocation_hidden', isHidden ? 'true' : 'false');
+    }
+}
 function closeEditModal()    { document.getElementById('editModal').classList.add('hidden'); }
 function closeDeleteModal()  { document.getElementById('deleteModal').classList.add('hidden'); }
 function closeInitModal()    { document.getElementById('initiativeModal').classList.add('hidden'); }

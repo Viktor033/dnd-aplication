@@ -1,9 +1,16 @@
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\CampaignEntity.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\CampaignService.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\CampaignStatus.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\CharacterEntity.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\CharacterService.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\SessionEntity.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\SessionStatus.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\SubscriptionTier.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\domain\UserEntity.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\ports\AiProvider.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\ports\CampaignRepository.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\ports\CharacterRepository.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\ports\SessionRepository.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\core\ports\UserRepository.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\DmEngineApplication.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\AiProviderConfig.java
@@ -11,6 +18,7 @@ C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\a
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\MockAiAdapter.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\rest\AuthController.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\rest\CampaignController.java
+C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\rest\CampaignCrudController.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\rest\CharacterController.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\rest\GlobalExceptionHandler.java
 C:\PROYECTOS\dnd-companion-api\src\main\java\com\vkdev\dmengine\infrastructure\adapters\security\JwtAuthenticationFilter.java

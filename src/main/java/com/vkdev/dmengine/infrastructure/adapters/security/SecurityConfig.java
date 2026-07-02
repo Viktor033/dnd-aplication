@@ -33,12 +33,13 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Recursos estáticos del frontend
-                .requestMatchers("/", "/index.html", "/script.js", "/background.png", "/*.jpeg", "/*.png", "/*.css", "/favicon.ico").permitAll()
+                // Recursos estáticos del frontend (incluye el nuevo dashboard)
+                .requestMatchers("/", "/index.html", "/dashboard.html", "/script.js",
+                        "/background.png", "/*.jpeg", "/*.png", "/*.css", "/favicon.ico").permitAll()
                 // Autenticación pública y endpoints de simulación
                 .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/upgrade-simulation").permitAll()
-                // Endpoints restringidos
-                .requestMatchers("/api/characters/**", "/api/campaign/**").authenticated()
+                // Endpoints restringidos (characters, campaigns CRUD y campaign IA)
+                .requestMatchers("/api/characters/**", "/api/campaigns/**", "/api/campaign/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

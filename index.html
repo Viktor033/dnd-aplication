@@ -18,6 +18,14 @@
             color: #f8fafc; 
             min-height: 100vh;
         }
+        @media (min-width: 1280px) {
+            body {
+                height: 100vh;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+        }
         /* Optimización para Celulares */
         @media (max-width: 768px) {
             body {
@@ -45,7 +53,7 @@
 </head>
 <body class="p-2 md:p-6">
 
-    <header class="flex justify-between items-center mb-8 glass p-4 shadow-2xl">
+    <header class="flex justify-between items-center mb-4 xl:mb-6 glass p-4 shadow-2xl shrink-0">
         <h1 class="text-3xl md:text-5xl medieval-font text-amber-500 font-bold uppercase tracking-tighter drop-shadow-lg">Dungeon Master Engine <span class="text-sm font-normal text-white/50 block md:inline md:ml-4 tracking-widest">v5.5 ELITE</span></h1>
         <div class="flex items-center gap-4">
             <!-- SaaS Session Info / Actions -->
@@ -57,25 +65,26 @@
             </div>
             <button id="saasLoginBtn" onclick="openAuthModal()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all transform hover:scale-105">🔓 INICIAR SESIÓN</button>
 
+            <button onclick="toggleInvocationPanel()" class="bg-emerald-700 hover:bg-emerald-600 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Nueva Invocación">➕</button>
             <button onclick="generateRoom()" class="bg-purple-700 hover:bg-purple-600 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Generar Narrativa IA">🧙</button>
             <button onclick="toggleDiceRoller()" class="bg-amber-600 hover:bg-amber-500 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Lanzar Dados">🎲</button>
             <button onclick="toggleLog()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110" title="Ver Bitácora">📜</button>
         </div>
     </header>
 
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 max-w-[1900px] mx-auto">
+    <main class="flex-1 min-h-0 flex flex-col xl:flex-row gap-6 max-w-[1900px] mx-auto w-full overflow-y-auto xl:overflow-hidden">
         
         <!-- PANEL DE INVOCACIÓN -->
-        <div class="xl:col-span-3">
-            <div class="glass p-6 rounded-2xl shadow-2xl sticky top-6">
+        <div id="invocationPanel" class="w-full xl:w-96 shrink-0 transition-all duration-300">
+            <div class="glass p-6 rounded-2xl shadow-2xl xl:h-full xl:overflow-y-auto scroll-custom">
                 <h2 class="text-2xl medieval-font text-amber-500 mb-6 border-b border-white/10 pb-2 text-center italic">Invocación de Aventurero</h2>
                 <div class="space-y-4">
                     <div class="relative">
-                        <input type="text" id="charName" placeholder="Nombre del Héroe" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-amber-500 transition-colors">
+                        <input type="text" id="charName" placeholder="Nombre del Héroe" class="w-full p-3 bg-white/5 border border-white/25 rounded-xl focus:outline-none focus:border-amber-500 transition-colors">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-3">
-                        <select id="charRace" onchange="updateRacePreview('racePreview', this.value)" class="p-3 bg-slate-900 border border-white/10 rounded-xl text-sm text-white">
+                        <select id="charRace" onchange="updateRacePreview('racePreview', this.value)" class="p-3 bg-slate-900 border border-white/25 rounded-xl text-sm text-white">
                             <option value="">Especie...</option>
                             <option value="Human">Humano</option><option value="Elf">Elfo</option>
                             <option value="Dwarf">Enano</option><option value="Halfling">Mediano</option>
@@ -85,27 +94,27 @@
                             <option value="Fairy">Hada</option><option value="Shifter">Shifter</option>
                             <option value="Warforged">Warforged</option>
                         </select>
-                        <select id="charGender" onchange="updateRacePreview('racePreview', document.getElementById('charRace').value)" class="p-3 bg-slate-900 border border-white/10 rounded-xl text-sm text-white font-bold">
+                        <select id="charGender" onchange="updateRacePreview('racePreview', document.getElementById('charRace').value)" class="p-3 bg-slate-900 border border-white/25 rounded-xl text-sm text-white font-bold">
                             <option value="M">♂ Hombre</option>
                             <option value="F">♀ Mujer</option>
                         </select>
                     </div>
 
-                    <div id="racePreview" class="h-32 w-full rounded-xl border border-white/10 bg-cover bg-center hidden shadow-2xl transition-all duration-700 hover:scale-105"></div>
+                    <div id="racePreview" class="h-32 w-full rounded-xl border border-white/25 bg-cover bg-center hidden shadow-2xl transition-all duration-700 hover:scale-105"></div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="text" id="charClass" placeholder="Clase" class="p-3 bg-white/5 border border-white/10 rounded-xl text-sm">
-                        <input type="text" id="charBackground" placeholder="Trasfondo" class="p-3 bg-white/5 border border-white/10 rounded-xl text-sm">
+                        <input type="text" id="charClass" placeholder="Clase" class="p-3 bg-white/5 border border-white/25 rounded-xl text-sm">
+                        <input type="text" id="charBackground" placeholder="Trasfondo" class="p-3 bg-white/5 border border-white/25 rounded-xl text-sm">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <select id="charAlignment" class="p-3 bg-slate-900 border border-white/10 rounded-xl text-sm">
+                        <select id="charAlignment" class="p-3 bg-slate-900 border border-white/25 rounded-xl text-sm">
                             <option value="">Alineamiento...</option>
-                            <option value="LG">LB</option><option value="NG">NB</option><option value="CG">CB</option>
-                            <option value="LN">LN</option><option value="TN">N</option><option value="CN">CN</option>
-                            <option value="LE">LM</option><option value="NE">NM</option><option value="CE">CM</option>
+                            <option value="LG">⚖️ Legal Bueno</option><option value="NG">🕊️ Neutral Bueno</option><option value="CG">🍃 Caótico Bueno</option>
+                            <option value="LN">⚖️ Legal Neutral</option><option value="TN">🌲 Neutral Absoluto</option><option value="CN">🌀 Caótico Neutral</option>
+                            <option value="LE">💀 Legal Malvado</option><option value="NE">💀 Neutral Malvado</option><option value="CE">🔥 Caótico Malvado</option>
                         </select>
-                        <select id="charCategory" class="p-3 bg-slate-900 border border-white/10 rounded-xl text-sm">
+                        <select id="charCategory" class="p-3 bg-slate-900 border border-white/25 rounded-xl text-sm">
                             <option value="HEROE">🛡️ Jugador</option>
                             <option value="MONSTRUO">👹 Monstruo</option>
                             <option value="NPC">👤 NPC</option>
@@ -115,24 +124,24 @@
                     <div class="flex gap-3">
                         <div class="flex-1">
                             <label class="text-[10px] uppercase text-white/50 ml-1">Nivel</label>
-                            <input type="number" id="charLevel" placeholder="1" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-center">
+                            <input type="number" id="charLevel" placeholder="1" class="w-full p-3 bg-white/5 border border-white/25 rounded-xl text-center">
                         </div>
                         <div class="flex-1">
                             <label class="text-[10px] uppercase text-white/50 ml-1">HP Máx</label>
-                            <input type="number" id="charHp" placeholder="10" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-center text-red-400 font-bold">
+                            <input type="number" id="charHp" placeholder="10" class="w-full p-3 bg-white/5 border border-white/25 rounded-xl text-center text-red-400 font-bold">
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-3 gap-2 bg-black/40 p-3 rounded-xl font-bold">
-                        <div class="text-center text-[10px] text-amber-600">STR<input type="number" id="charStr" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
-                        <div class="text-center text-[10px] text-amber-600">DEX<input type="number" id="charDex" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
-                        <div class="text-center text-[10px] text-amber-600">CON<input type="number" id="charCon" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
-                        <div class="text-center text-[10px] text-amber-600">INT<input type="number" id="charInt" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
-                        <div class="text-center text-[10px] text-amber-600">WIS<input type="number" id="charWis" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
-                        <div class="text-center text-[10px] text-amber-600">CHA<input type="number" id="charCha" value="10" class="w-full bg-transparent text-center text-white border-b border-white/10"></div>
+                        <div class="text-center text-[10px] text-amber-600">STR<input type="number" id="charStr" value="10" class="w-full bg-transparent text-center text-white border-b border-white/25"></div>
+                        <div class="text-center text-[10px] text-amber-600">DEX<input type="number" id="charDex" value="10" class="w-full bg-transparent text-center text-white border-b border-white/25"></div>
+                        <div class="text-center text-[10px] text-amber-600">CON<input type="number" id="charCon" value="10" class="w-full bg-transparent text-center text-white border-b border-white/25"></div>
+                        <div class="text-center text-[10px] text-amber-600">INT<input type="number" id="charInt" value="10" class="w-full bg-transparent text-center text-white border-b border-white/25"></div>
+                        <div class="text-center text-[10px] text-amber-600">WIS<input type="number" id="charWis" value="10" class="w-full bg-transparent text-center text-white border-b border-white/25"></div>
+                        <div class="text-center text-[10px] text-amber-600">CHA<input type="number" id="charCha" value="10" class="w-full bg-transparent text-center text-white border-b border-white/25"></div>
                     </div>
                     
-                    <textarea id="charDesc" placeholder="Rasgos y notas..." class="w-full p-3 bg-white/5 border border-white/10 rounded-xl h-20 text-sm"></textarea>
+                    <textarea id="charDesc" placeholder="Rasgos y notas..." class="w-full p-3 bg-white/5 border border-white/25 rounded-xl h-20 text-sm"></textarea>
                     
                     <button onclick="saveCharacter()" class="w-full bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] medieval-font uppercase tracking-widest">Forjar Personaje</button>
                 </div>
@@ -140,9 +149,9 @@
         </div>
 
         <!-- LISTAS PRINCIPALES -->
-        <div class="xl:col-span-9 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-[85vh]">
+        <div class="flex-1 xl:h-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 min-w-0">
             <!-- JUGADORES -->
-            <div class="glass p-4 flex flex-col overflow-hidden group">
+            <div class="glass p-4 flex flex-col h-[450px] xl:h-full overflow-hidden group">
                 <h2 class="text-xl medieval-font border-b border-blue-500/30 mb-4 flex justify-between items-center text-blue-400">
                     🛡️ Jugadores <span id="countHeroes" class="bg-blue-600/20 text-blue-400 px-3 py-0.5 rounded-full text-xs border border-blue-500/30">0</span>
                     <button onclick="purgeDead()" class="text-[9px] bg-red-900/40 hover:bg-red-800 px-2 py-1 rounded border border-red-500/30 transition-colors" title="Eliminar todos los muertos">PURGAR</button>
@@ -152,7 +161,7 @@
             </div>
 
             <!-- NPCs -->
-            <div class="glass p-4 flex flex-col overflow-hidden">
+            <div class="glass p-4 flex flex-col h-[450px] xl:h-full overflow-hidden">
                 <h2 class="text-xl medieval-font border-b border-amber-500/30 mb-4 flex justify-between items-center text-amber-500">
                     👤 NPCs <span id="countNPCs" class="bg-amber-600/20 text-amber-400 px-3 py-0.5 rounded-full text-xs border border-amber-500/30">0</span>
                 </h2>
@@ -161,7 +170,7 @@
             </div>
 
             <!-- MONSTRUOS -->
-            <div class="glass p-4 flex flex-col overflow-hidden">
+            <div class="glass p-4 flex flex-col h-[450px] xl:h-full overflow-hidden">
                 <h2 class="text-xl medieval-font border-b border-red-500/30 mb-4 flex justify-between items-center text-red-500">
                     👹 Monstruos <span id="countMonsters" class="bg-red-600/20 text-red-400 px-3 py-0.5 rounded-full text-xs border border-red-500/30">0</span>
                 </h2>
@@ -170,14 +179,14 @@
             </div>
 
             <!-- INICIATIVA -->
-            <div class="glass p-4 border-amber-500/20 flex flex-col overflow-hidden">
+            <div class="glass p-4 border-amber-500/20 flex flex-col h-[450px] xl:h-full overflow-hidden">
                 <h2 class="text-xl medieval-font border-b border-purple-500/30 mb-4 flex justify-between items-center text-purple-400">
                     ⚔️ Orden de Turno <button onclick="clearInitiative()" class="text-[10px] bg-purple-600/20 hover:bg-purple-600/40 px-3 py-1 rounded-lg border border-purple-500/30 transition-colors">REINICIAR</button>
                 </h2>
                 <div id="initiativeList" class="space-y-3 overflow-y-auto pr-2 scroll-custom flex-1"></div>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- PANEL DE DADOS (FLOTANTE) -->
     <div id="dicePanel" class="fixed bottom-6 right-6 glass p-6 w-72 shadow-2xl hidden z-50 border-amber-500/30 transform transition-all duration-300 translate-y-0">

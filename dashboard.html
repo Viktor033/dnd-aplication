@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Realms — Dashboard de Campaña</title>
+    <meta name="description" content="Panel de control para gestionar partidas de rol, fichas de personajes e historial de sesiones. Fantasy Realms DM Dashboard.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           DESIGN TOKENS — Fantasy Realms Palette
+           ============================================
+           Primary:  Deep Indigo-Slate (#080612)    — fondo oscuro, profundo
+           Accent 1: Amber-Gold (#d4a017)           — dorado pergamino
+           Accent 2: Crimson (#c0293e)              — peligro / HP / combate
+           Accent 3: Arcane Purple (#7c3aed)        — magia / habilidades
+           Accent 4: Forest Teal (#0d9488)          — NPCs / naturaleza
+           Neutral:  Slate-50 → slate-400
+        ============================================ */
+        :root {
+            --bg-void:        #080612;
+            --bg-deep:        #0f0d1a;
+            --bg-panel:       rgba(18, 14, 36, 0.85);
+            --bg-card:        rgba(22, 18, 45, 0.92);
+            --bg-hover:       rgba(36, 28, 70, 0.95);
+
+            --gold:           #d4a017;
+            --gold-light:     #f0c040;
+            --gold-dim:       rgba(212, 160, 23, 0.15);
+
+            --crimson:        #c0293e;
+            --crimson-light:  #e84060;
+            --crimson-dim:    rgba(192, 41, 62, 0.18);
+
+            --arcane:         #7c3aed;
+            --arcane-light:   #a855f7;
+            --arcane-dim:     rgba(124, 58, 237, 0.18);
+
+            --teal:           #0d9488;
+            --teal-light:     #2dd4bf;
+            --teal-dim:       rgba(13, 148, 136, 0.15);
+
+            --azure-light:    #60a5fa;
+            --azure-dim:      rgba(29, 78, 216, 0.18);
+
+            --border:         rgba(212, 160, 23, 0.12);
+            --border-strong:  rgba(212, 160, 23, 0.28);
+            --text-primary:   #f1ece0;
+            --text-secondary: #a89f8c;
+            --text-muted:     #5c5347;
+
+            --radius-sm:      6px;
+            --radius-md:      10px;
+            --radius-lg:      14px;
+
+            --shadow-gold:    0 0 24px rgba(212, 160, 23, 0.12);
+            --shadow-card:    0 4px 24px rgba(0,0,0,0.5);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-size: 14px; scrollbar-width: thin; scrollbar-color: var(--gold) var(--bg-deep); }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-void);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,58,237,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 100%, rgba(212,160,23,0.06) 0%, transparent 60%),
+                radial-gradient(1px 1px at 20% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+                radial-gradient(1px 1px at 55% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
+                radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.25) 0%, transparent 100%),
+                radial-gradient(1px 1px at 10% 70%, rgba(255,255,255,0.2) 0%, transparent 100%),
+                radial-gradient(1px 1px at 92% 45%, rgba(255,255,255,0.3) 0%, transparent 100%);
+        }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 99px; }
+
+        .font-display { font-family: 'Cinzel', serif; }
+        .font-brand   { font-family: 'Cinzel Decorative', serif; }
+
+        /* ============ LAYOUT ============ */
+        .app-shell {
+            display: grid;
+            grid-template-rows: 56px 1fr;
+            grid-template-columns: 220px 1fr;
+            grid-template-areas: "topbar topbar" "sidebar main";
+            min-height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ---- TOPBAR ---- */
+        .topbar {
+            grid-area: topbar;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            height: 56px;
+            background: rgba(8, 6, 18, 0.9);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+        }
+
+        .topbar-brand { display: flex; align-items: center; gap: 10px; }
+        .brand-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--gold) 0%, #a07010 100%);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 0 12px rgba(212,160,23,0.3);
+        }
+        .brand-name { font-family: 'Cinzel Decorative', serif; font-size: 0.85rem; color: var(--gold-light); letter-spacing: 0.06em; }
+        .brand-sub  { font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-top: -2px; }
+
+        .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+        .topbar-search {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 6px 12px; width: 220px;
+            transition: border-color 0.2s;
+        }
+        .topbar-search:focus-within { border-color: var(--gold); }
+        .topbar-search input {
+            background: none; border: none; outline: none;
+            color: var(--text-primary); font-size: 0.8rem; font-family: 'Inter', sans-serif; width: 100%;
+        }
+        .topbar-search input::placeholder { color: var(--text-muted); }
+
+        .role-pill { display: flex; gap: 4px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 4px; }
+        .role-pill button {
+            padding: 4px 10px; border: none; border-radius: var(--radius-sm);
+            font-size: 0.7rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; letter-spacing: 0.04em; text-transform: uppercase;
+            background: transparent; color: var(--text-muted); font-family: 'Inter', sans-serif;
+        }
+        .role-pill button.active { background: var(--arcane); color: #fff; }
+
+        .topbar-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--arcane) 0%, var(--crimson) 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; border: 2px solid var(--arcane); cursor: pointer; position: relative;
+        }
+        .status-dot {
+            width: 8px; height: 8px; background: var(--teal-light); border-radius: 50%;
+            position: absolute; bottom: 0; right: 0; border: 2px solid var(--bg-void);
+        }
+
+        .dm-crown {
+            background: linear-gradient(135deg, var(--gold) 0%, #a07010 100%);
+            color: #1a1200; font-size: 0.62rem; font-weight: 700;
+            padding: 2px 8px; border-radius: 99px; letter-spacing: 0.06em; text-transform: uppercase;
+        }
+
+        /* ---- SIDEBAR ---- */
+        .sidebar {
+            grid-area: sidebar;
+            background: rgba(8, 6, 18, 0.7);
+            border-right: 1px solid var(--border);
+            padding: 16px 10px;
+            overflow-y: auto;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+
+        .sidebar-section-label {
+            font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em;
+            text-transform: uppercase; color: var(--text-muted); padding: 8px 10px 4px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+            border-radius: var(--radius-md); cursor: pointer; transition: all 0.15s ease;
+            font-size: 0.82rem; font-weight: 500; color: var(--text-secondary);
+            border: 1px solid transparent; text-decoration: none;
+        }
+        .nav-item:hover { background: rgba(212,160,23,0.07); color: var(--text-primary); }
+        .nav-item.active { background: var(--gold-dim); border-color: var(--border-strong); color: var(--gold-light); }
+        .nav-item.active .nav-icon { color: var(--gold); }
+        .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+        .nav-badge {
+            margin-left: auto; background: var(--crimson); color: #fff;
+            font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 99px;
+        }
+
+        .sidebar-session-card {
+            margin: 10px 0; padding: 10px 12px;
+            background: var(--arcane-dim); border: 1px solid rgba(124,58,237,0.25);
+            border-radius: var(--radius-md);
+        }
+
+        .session-status-dot {
+            width: 7px; height: 7px; background: var(--teal-light); border-radius: 50%;
+            display: inline-block; box-shadow: 0 0 6px var(--teal-light); animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.35s ease forwards; }
+
+        /* ---- MAIN ---- */
+        .main {
+            grid-area: main;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        .main-header {
+            padding: 14px 20px 0;
+            display: flex; align-items: flex-end; justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px; border: none; border-radius: var(--radius-md);
+            font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            font-family: 'Inter', sans-serif; transition: all 0.15s ease; letter-spacing: 0.02em;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold) 0%, #a07010 100%);
+            color: #1a1200; box-shadow: 0 0 16px rgba(212,160,23,0.25);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(212,160,23,0.35); }
+        .btn-ghost { background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text-secondary); }
+        .btn-ghost:hover { border-color: var(--border-strong); color: var(--text-primary); }
+
+        /* ---- METRICS BAR ---- */
+        .metrics-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 10px; padding: 10px 20px 0; flex-shrink: 0;
+        }
+
+        .metric-card {
+            background: var(--bg-panel); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 10px 14px;
+            display: flex; align-items: center; gap: 10px;
+            transition: border-color 0.2s;
+        }
+        .metric-card:hover { border-color: var(--border-strong); }
+        .metric-icon {
+            width: 36px; height: 36px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+        }
+        .icon-gold    { background: var(--gold-dim); }
+        .icon-crimson { background: var(--crimson-dim); }
+        .icon-arcane  { background: var(--arcane-dim); }
+        .icon-teal    { background: var(--teal-dim); }
+        .metric-val { font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+        .metric-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+        /* ---- TOOLBARS ---- */
+        .toolbars { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 8px 20px 0; flex-shrink: 0; }
+
+        .turn-tracker {
+            background: var(--bg-panel); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 8px 12px;
+            display: flex; align-items: center; gap: 8px; overflow: hidden;
+        }
+        .turn-tracker-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+        .turn-list { display: flex; gap: 6px; overflow-x: auto; flex: 1; }
+        .turn-list::-webkit-scrollbar { display: none; }
+
+        .turn-item {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03); cursor: pointer; white-space: nowrap;
+            transition: all 0.2s; min-width: 60px;
+        }
+        .turn-item:hover { border-color: var(--border-strong); }
+        .turn-item.active-turn { background: var(--gold-dim); border-color: var(--gold); box-shadow: 0 0 10px rgba(212,160,23,0.2); }
+        .turn-avatar { font-size: 1rem; }
+        .turn-name { font-size: 0.6rem; font-weight: 600; color: var(--text-secondary); max-width: 56px; overflow: hidden; text-overflow: ellipsis; }
+        .turn-init { font-size: 0.65rem; font-weight: 700; color: var(--gold); }
+        .turn-item.active-turn .turn-name { color: var(--gold-light); }
+
+        .dice-bar {
+            background: var(--bg-panel); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 8px 12px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .dice-bar-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+        .dice-buttons { display: flex; gap: 5px; }
+        .die-btn {
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 0.72rem;
+            font-weight: 700; cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif;
+        }
+        .die-btn:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+        .die-result {
+            font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 700;
+            color: var(--gold); background: var(--gold-dim); border: 1px solid var(--border-strong);
+            border-radius: var(--radius-sm); padding: 4px 12px; min-width: 44px; text-align: center;
+            transition: color 0.4s;
+        }
+
+        /* ---- DASHBOARD GRID ---- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 1.4fr;
+            gap: 12px;
+            padding: 10px 20px 16px;
+            overflow: auto;
+            flex: 1;
+        }
+
+        /* ---- PANEL ---- */
+        .panel {
+            background: var(--bg-panel); border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+        }
+        .panel-title { display: flex; align-items: center; gap: 8px; font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.06em; color: var(--text-primary); }
+        .panel-icon { width: 26px; height: 26px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+
+        .panel-body { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+        /* ---- CAMPAIGNS ---- */
+        .campaign-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-left: 3px solid var(--gold); border-radius: var(--radius-md);
+            padding: 10px 12px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .campaign-card:hover { border-left-color: var(--gold-light); background: var(--bg-hover); box-shadow: var(--shadow-gold); }
+        .campaign-card.active-session { border-left-color: var(--teal-light); background: rgba(13,148,136,0.05); box-shadow: 0 0 0 1px rgba(45,212,191,0.2), 0 4px 16px rgba(13,148,136,0.1); }
+        .campaign-card.paused { border-left-color: var(--arcane); opacity: 0.85; }
+        .campaign-card.completed { border-left-color: var(--text-muted); opacity: 0.6; }
+
+        .campaign-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+        .campaign-name { font-family: 'Cinzel', serif; font-size: 0.88rem; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+        .campaign-system { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+        .campaign-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+        .meta-chip { display: flex; align-items: center; gap: 4px; font-size: 0.68rem; color: var(--text-secondary); }
+
+        .progress-bar { height: 3px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); transition: width 0.5s; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--text-muted); margin-top: 3px; }
+
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+        /* ---- CHARACTERS ---- */
+        .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .char-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 10px; cursor: pointer;
+            transition: all 0.2s ease; position: relative; overflow: hidden;
+        }
+        .char-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+        .char-card.warrior::before { background: linear-gradient(90deg, var(--crimson), transparent); }
+        .char-card.mage::before    { background: linear-gradient(90deg, var(--arcane), transparent); }
+        .char-card.cleric::before  { background: linear-gradient(90deg, var(--gold), transparent); }
+        .char-card.ranger::before  { background: linear-gradient(90deg, #16a34a, transparent); }
+        .char-card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+
+        .char-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .char-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 2px solid var(--border-strong);
+            background: linear-gradient(135deg, var(--bg-hover), var(--arcane-dim));
+            display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+        }
+        .char-info { flex: 1; min-width: 0; }
+        .char-name { font-family: 'Cinzel', serif; font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
+        .char-subname { font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .char-level { font-family: 'Cinzel', serif; font-size: 0.7rem; font-weight: 700; color: var(--gold); background: var(--gold-dim); padding: 2px 6px; border-radius: 99px; flex-shrink: 0; }
+
+        .hp-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.65rem; color: var(--text-muted); margin-bottom: 3px; }
+        .hp-val { font-weight: 700; font-size: 0.75rem; }
+        .hp-val.high   { color: #4ade80; }
+        .hp-val.medium { color: #fbbf24; }
+        .hp-val.low    { color: var(--crimson-light); }
+        .hp-bar { height: 4px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
+        .hp-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+        .hp-fill.high   { background: linear-gradient(90deg, #16a34a, #4ade80); }
+        .hp-fill.medium { background: linear-gradient(90deg, #b45309, #fbbf24); }
+        .hp-fill.low    { background: linear-gradient(90deg, #991b1b, var(--crimson-light)); }
+
+        .stat-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; margin-top: 8px; }
+        .stat-cell { background: rgba(255,255,255,0.04); border-radius: 4px; padding: 3px 1px; text-align: center; }
+        .stat-abbr { font-size: 0.55rem; color: var(--text-muted); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; display: block; }
+        .stat-val  { font-size: 0.72rem; font-weight: 700; color: var(--text-primary); display: block; line-height: 1.2; }
+        .stat-mod  { font-size: 0.55rem; font-weight: 600; color: var(--gold); }
+
+        .conditions { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 5px; }
+        .condition-tag { font-size: 0.58rem; font-weight: 600; padding: 1px 5px; border-radius: 99px; letter-spacing: 0.04em; text-transform: uppercase; }
+        .cond-burning  { background: rgba(180,83,9,0.2);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+        .cond-exhausted{ background: rgba(71,85,105,0.3); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3); }
+
+        .char-actions { display: flex; gap: 4px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+        .char-action-btn {
+            flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            border-radius: 4px; padding: 3px 0; font-size: 0.65rem; font-weight: 600;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.15s; text-align: center;
+            font-family: 'Inter', sans-serif;
+        }
+        .char-action-btn:hover { background: var(--gold-dim); color: var(--gold); border-color: var(--border-strong); }
+        .char-action-btn.heal   { color: #4ade80; }
+        .char-action-btn.damage { color: var(--crimson-light); }
+
+        /* ---- SESSIONS ---- */
+        .session-entry {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 10px 12px;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .session-entry:hover { border-color: var(--border-strong); }
+        .session-entry.current-session { border-color: rgba(45,212,191,0.35); background: rgba(13,148,136,0.06); }
+
+        .session-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .session-num { font-family: 'Cinzel', serif; font-size: 0.68rem; color: var(--text-muted); font-weight: 600; }
+        .session-title { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); flex: 1; line-height: 1.3; }
+        .session-date { font-size: 0.65rem; color: var(--text-muted); }
+        .session-summary { font-size: 0.72rem; color: var(--text-secondary); line-height: 1.5; margin-top: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .session-tags { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+        .session-tag { font-size: 0.62rem; padding: 2px 6px; border-radius: 99px; font-weight: 600; }
+        .tag-combat   { background: var(--crimson-dim); color: var(--crimson-light); border: 1px solid rgba(192,41,62,0.25); }
+        .tag-roleplay { background: var(--arcane-dim);  color: var(--arcane-light);  border: 1px solid rgba(124,58,237,0.25); }
+        .tag-explore  { background: var(--teal-dim);    color: var(--teal-light);    border: 1px solid rgba(13,148,136,0.25); }
+        .tag-mystery  { background: var(--gold-dim);    color: var(--gold);          border: 1px solid rgba(212,160,23,0.25); }
+        .tag-death    { background: rgba(0,0,0,0.4);    color: #6b7280;              border: 1px solid rgba(107,114,128,0.25); }
+        .session-stats { display: flex; gap: 10px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+        .session-stat { font-size: 0.65rem; color: var(--text-muted); }
+        .session-stat strong { color: var(--text-secondary); font-weight: 600; }
+
+        /* ---- LOG ---- */
+        .log-entry-item { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .log-entry-item:last-child { border-bottom: none; }
+        .log-time { font-size: 0.6rem; color: var(--text-muted); white-space: nowrap; margin-top: 1px; min-width: 36px; }
+        .log-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+        .log-dot.blue   { background: var(--azure-light); }
+        .log-dot.red    { background: var(--crimson-light); }
+        .log-dot.gold   { background: var(--gold); }
+        .log-dot.purple { background: var(--arcane-light); }
+        .log-dot.teal   { background: var(--teal-light); }
+        .log-msg { font-size: 0.72rem; color: var(--text-secondary); line-height: 1.5; }
+        .log-msg strong { color: var(--text-primary); }
+
+        /* ---- COL 3 ---- */
+        .col3 { display: flex; flex-direction: column; gap: 12px; }
+
+        /* ---- ACCESSIBILITY ---- */
+        :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
+        .skip-link {
+            position: absolute; top: -40px; left: 0;
+            background: var(--gold); color: #1a1200; padding: 8px 16px;
+            z-index: 9999; font-weight: 700; font-size: 0.8rem;
+            border-radius: 0 0 var(--radius-md) 0; transition: top 0.15s;
+        }
+        .skip-link:focus { top: 0; }
+
+        /* ---- RESPONSIVE ---- */
+        @media (max-width: 1200px) {
+            .dashboard-grid { grid-template-columns: 1fr 1fr; }
+            .char-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 900px) {
+            .app-shell { grid-template-columns: 1fr; grid-template-areas: "topbar" "main"; max-height: unset; }
+            .sidebar { display: none; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .metrics-bar { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* ============================================
+           MODALS & FORMS — Void & Gold Aesthetic
+           ============================================ */
+        .fr-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(4, 3, 10, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .fr-modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .fr-modal {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-strong);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8), var(--shadow-gold);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        .fr-modal-overlay.active .fr-modal {
+            transform: scale(1);
+        }
+        .fr-modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .fr-modal-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            color: var(--gold);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        .fr-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+        .fr-modal-close:hover {
+            color: var(--crimson-light);
+        }
+        .fr-modal-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .fr-modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Forms inside modal */
+        .fr-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .fr-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+        .fr-input, .fr-select, .fr-textarea {
+            background: rgba(8, 6, 18, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .fr-input:focus, .fr-select:focus, .fr-textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 8px rgba(212, 160, 23, 0.25);
+        }
+        .fr-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .fr-checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .fr-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .fr-checkbox-label:hover {
+            background: rgba(212, 160, 23, 0.04);
+            border-color: rgba(212, 160, 23, 0.3);
+        }
+        .fr-checkbox-label input {
+            accent-color: var(--gold);
+        }
+
+        /* Custom tracker config styles */
+        .init-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.02);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        .init-row span {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .init-input {
+            width: 60px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-shell" role="application" aria-label="Fantasy Realms Dashboard">
+
+        <!-- ========== TOP BAR ========== -->
+        <header class="topbar" role="banner">
+            <div class="topbar-brand">
+                <div class="brand-icon" aria-hidden="true">⚔️</div>
+                <div>
+                    <span class="brand-name">Fantasy Realms</span>
+                    <span class="brand-sub">DM Engine — War Room</span>
+                </div>
+            </div>
+
+            <div class="topbar-search" role="search" aria-label="Búsqueda global">
+                <span aria-hidden="true" style="color:var(--text-muted);">🔍</span>
+                <input type="search" id="global-search" placeholder="Buscar personajes, campañas, sesiones..." aria-label="Buscar en el dashboard" autocomplete="off">
+            </div>
+
+            <div class="topbar-actions">
+                <div class="role-pill" role="group" aria-label="Modo de vista">
+                    <button class="active" id="btn-dm-mode"     aria-pressed="true"  onclick="setRole('dm')">👑 DM</button>
+                    <button           id="btn-player-mode" aria-pressed="false" onclick="setRole('player')">🛡️ Jugador</button>
+                </div>
+
+                <button class="btn btn-ghost" id="btn-notifications" aria-label="Notificaciones — 3 nuevas" style="padding:6px 10px;">
+                    🔔 <span style="background:var(--crimson);color:#fff;font-size:0.6rem;padding:1px 5px;border-radius:99px;" aria-hidden="true">3</span>
+                </button>
+
+                <div class="topbar-avatar" role="button" tabindex="0" aria-label="Menú de usuario — Viktor (DM)" aria-haspopup="true">
+                    🧙
+                    <span class="status-dot" aria-hidden="true"></span>
+                </div>
+                <span class="dm-crown" aria-label="Rol: Dungeon Master">DM</span>
+            </div>
+        </header>
+
+        <!-- ========== SIDEBAR ========== -->
+        <nav class="sidebar" aria-label="Navegación principal">
+
+            <div class="sidebar-session-card" role="status" aria-live="polite" aria-label="Sesión activa en curso">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                    <span class="session-status-dot" aria-hidden="true"></span>
+                    <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--teal-light);">Sesión Activa</span>
+                </div>
+                <div style="font-family:'Cinzel',serif;font-size:0.8rem;color:var(--text-primary);font-weight:600;margin-bottom:2px;">La Maldición de Strahd</div>
+                <div style="font-size:0.65rem;color:var(--text-secondary);">Sesión #12 · 1h 47min</div>
+                <div class="progress-bar" style="margin-top:6px;">
+                    <div class="progress-fill" style="width:65%;background:linear-gradient(90deg,var(--teal),var(--teal-light));"></div>
+                </div>
+            </div>
+
+            <div class="sidebar-section-label">General</div>
+            <a href="#dashboard" class="nav-item active" aria-current="page"><span class="nav-icon" aria-hidden="true">📊</span> Dashboard</a>
+            <a href="#campaigns" class="nav-item"><span class="nav-icon" aria-hidden="true">🗺️</span> Campañas <span class="nav-badge" aria-label="3 campañas">3</span></a>
+            <a href="#characters" class="nav-item"><span class="nav-icon" aria-hidden="true">🛡️</span> Personajes</a>
+            <a href="#monsters" class="nav-item"><span class="nav-icon" aria-hidden="true">👹</span> Bestiario</a>
+            <a href="#npcs" class="nav-item"><span class="nav-icon" aria-hidden="true">👤</span> NPCs</a>
+
+            <div class="sidebar-section-label">Sesión</div>
+            <a href="#initiative" class="nav-item"><span class="nav-icon" aria-hidden="true">⚔️</span> Iniciativa</a>
+            <a href="#combat-log" class="nav-item"><span class="nav-icon" aria-hidden="true">📜</span> Bitácora</a>
+            <a href="#map" class="nav-item"><span class="nav-icon" aria-hidden="true">🏔️</span> Mapa</a>
+            <a href="#loot" class="nav-item"><span class="nav-icon" aria-hidden="true">💰</span> Tesoros</a>
+
+            <div class="sidebar-section-label">Herramientas</div>
+            <a href="#ai-narrative" class="nav-item"><span class="nav-icon" aria-hidden="true">🧙</span> IA Narrativa</a>
+            <a href="#tables" class="nav-item"><span class="nav-icon" aria-hidden="true">🎲</span> Tablas Aleatorias</a>
+            <a href="#settings" class="nav-item"><span class="nav-icon" aria-hidden="true">⚙️</span> Ajustes</a>
+        </nav>
+
+        <!-- ========== MAIN ========== -->
+        <main class="main" id="main-content" tabindex="-1">
+
+            <div class="main-header">
+                <div>
+                    <h1 class="font-display" style="font-size:1.1rem;font-weight:700;">Dashboard de Campaña</h1>
+                    <p style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">Martes 1 de Julio · Sesión en curso · 4 jugadores conectados</p>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-ghost" id="btn-end-session">⏹ Terminar Sesión</button>
+                    <button class="btn btn-primary" id="btn-new-campaign">✚ Nueva Campaña</button>
+                </div>
+            </div>
+
+            <!-- Metrics -->
+            <section class="metrics-bar" aria-label="Métricas rápidas">
+                <div class="metric-card" role="article" aria-label="3 campañas activas">
+                    <div class="metric-icon icon-gold" aria-hidden="true">🗺️</div>
+                    <div><div class="metric-val">3</div><div class="metric-label">Campañas Activas</div></div>
+                </div>
+                <div class="metric-card" role="article" aria-label="4 héroes en mesa">
+                    <div class="metric-icon icon-arcane" aria-hidden="true">🛡️</div>
+                    <div><div class="metric-val">4</div><div class="metric-label">Héroes en Mesa</div></div>
+                </div>
+                <div class="metric-card" role="article" aria-label="12 sesiones jugadas">
+                    <div class="metric-icon icon-teal" aria-hidden="true">📜</div>
+                    <div><div class="metric-val">12</div><div class="metric-label">Sesiones Jugadas</div></div>
+                </div>
+                <div class="metric-card" role="article" aria-label="23 enemigos caídos">
+                    <div class="metric-icon icon-crimson" aria-hidden="true">💀</div>
+                    <div><div class="metric-val">23</div><div class="metric-label">Enemigos Caídos</div></div>
+                </div>
+            </section>
+
+            <!-- Toolbars: Initiative + Dice -->
+            <div class="toolbars">
+                <div class="turn-tracker" role="region" aria-label="Orden de turno">
+                    <span class="turn-tracker-label">Turno</span>
+                    <div class="turn-list" role="list" aria-label="Orden de combate">
+                        <div class="turn-item active-turn" role="listitem" aria-current="true" tabindex="0" aria-label="Turno actual: Lyra, 22">
+                            <span class="turn-avatar" aria-hidden="true">🧝</span><span class="turn-name">Lyra</span><span class="turn-init">22</span>
+                        </div>
+                        <div class="turn-item" role="listitem" tabindex="0" aria-label="Goblin Arquero, 18">
+                            <span class="turn-avatar" aria-hidden="true">👹</span><span class="turn-name">Goblin</span><span class="turn-init">18</span>
+                        </div>
+                        <div class="turn-item" role="listitem" tabindex="0" aria-label="Theron, 15">
+                            <span class="turn-avatar" aria-hidden="true">⚒️</span><span class="turn-name">Theron</span><span class="turn-init">15</span>
+                        </div>
+                        <div class="turn-item" role="listitem" tabindex="0" aria-label="Zara, 14">
+                            <span class="turn-avatar" aria-hidden="true">🔮</span><span class="turn-name">Zara</span><span class="turn-init">14</span>
+                        </div>
+                        <div class="turn-item" role="listitem" tabindex="0" aria-label="Strahd, 12">
+                            <span class="turn-avatar" aria-hidden="true">🧛</span><span class="turn-name">Strahd</span><span class="turn-init">12</span>
+                        </div>
+                        <div class="turn-item" role="listitem" tabindex="0" aria-label="Brodak, 9">
+                            <span class="turn-avatar" aria-hidden="true">🗡️</span><span class="turn-name">Brodak</span><span class="turn-init">9</span>
+                        </div>
+                        <div class="turn-item" role="listitem" tabindex="0" aria-label="Celeste, 7">
+                            <span class="turn-avatar" aria-hidden="true">✨</span><span class="turn-name">Celeste</span><span class="turn-init">7</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost" id="btn-next-turn" style="padding:5px 10px;font-size:0.7rem;" aria-label="Siguiente turno">▶ Siguiente</button>
+                </div>
+
+                <div class="dice-bar" role="region" aria-label="Lanzador rápido de dados">
+                    <span class="dice-bar-label">Dados</span>
+                    <div class="dice-buttons" role="group" aria-label="Tipos de dado">
+                        <button class="die-btn" onclick="rollDie(4)"  aria-label="Lanzar d4">d4</button>
+                        <button class="die-btn" onclick="rollDie(6)"  aria-label="Lanzar d6">d6</button>
+                        <button class="die-btn" onclick="rollDie(8)"  aria-label="Lanzar d8">d8</button>
+                        <button class="die-btn" onclick="rollDie(10)" aria-label="Lanzar d10">d10</button>
+                        <button class="die-btn" onclick="rollDie(12)" aria-label="Lanzar d12">d12</button>
+                        <button class="die-btn" onclick="rollDie(20)" aria-label="Lanzar d20" style="color:var(--gold);">d20</button>
+                    </div>
+                    <div class="die-result" id="dice-display" aria-live="polite" aria-label="Resultado del dado">—</div>
+                </div>
+            </div>
+
+            <!-- Dashboard 3-column Grid -->
+            <div class="dashboard-grid fade-in">
+
+                <!-- ===== COL 1: CAMPAIGNS ===== -->
+                <section class="panel" aria-labelledby="campaigns-heading">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <div class="panel-icon icon-gold" aria-hidden="true">🗺️</div>
+                            <h2 id="campaigns-heading" class="font-display">Campañas Activas</h2>
+                        </div>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <span class="badge" style="background:var(--gold-dim);color:var(--gold);border:1px solid var(--border-strong);">3</span>
+                            <button class="btn btn-ghost" style="padding:4px 10px;font-size:0.7rem;">Ver todas</button>
+                        </div>
+                    </div>
+                    <div class="panel-body" role="list" aria-label="Lista de campañas">
+
+                        <!-- Campaign 1 — ACTIVE -->
+                        <article class="campaign-card active-session" role="listitem" tabindex="0" aria-label="Campaña activa: La Maldición de Strahd — EN VIVO">
+                            <div class="campaign-top">
+                                <div>
+                                    <div class="campaign-name">La Maldición de Strahd</div>
+                                    <div class="campaign-system">D&amp;D 5e · Ravenloft</div>
+                                </div>
+                                <span class="badge" style="background:rgba(13,148,136,0.2);color:var(--teal-light);border:1px solid rgba(45,212,191,0.25);">
+                                    <span style="width:5px;height:5px;border-radius:50%;background:var(--teal-light);display:inline-block;animation:pulse 2s infinite;" aria-hidden="true"></span>
+                                    EN VIVO
+                                </span>
+                            </div>
+                            <div class="campaign-meta">
+                                <span class="meta-chip">👥 4 jugadores</span>
+                                <span class="meta-chip">📖 Sesión #12</span>
+                                <span class="meta-chip">🕐 1h 47min</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:48%;background:linear-gradient(90deg,var(--teal),var(--teal-light));"></div>
+                            </div>
+                            <div class="progress-label"><span>Arco I: El Dominio de Barovia</span><span>48%</span></div>
+                        </article>
+
+                        <!-- Campaign 2 — PAUSED -->
+                        <article class="campaign-card paused" role="listitem" tabindex="0" aria-label="Campaña pausada: Los Reinos Olvidados">
+                            <div class="campaign-top">
+                                <div>
+                                    <div class="campaign-name">Los Reinos Olvidados</div>
+                                    <div class="campaign-system">D&amp;D 5e · Faerûn</div>
+                                </div>
+                                <span class="badge" style="background:var(--arcane-dim);color:var(--arcane-light);border:1px solid rgba(124,58,237,0.25);">PAUSADA</span>
+                            </div>
+                            <div class="campaign-meta">
+                                <span class="meta-chip">👥 3 jugadores</span>
+                                <span class="meta-chip">📖 Sesión #7</span>
+                                <span class="meta-chip">📅 Vie 4 Jul</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:30%;"></div>
+                            </div>
+                            <div class="progress-label"><span>Arco I: La Costa de la Espada</span><span>30%</span></div>
+                        </article>
+
+                        <!-- Campaign 3 — COMPLETED -->
+                        <article class="campaign-card completed" role="listitem" tabindex="0" aria-label="Campaña completada: La Mina Perdida de Phandelver">
+                            <div class="campaign-top">
+                                <div>
+                                    <div class="campaign-name">La Mina Perdida de Phandelver</div>
+                                    <div class="campaign-system">D&amp;D 5e · One-Shot</div>
+                                </div>
+                                <span class="badge" style="background:rgba(255,255,255,0.05);color:var(--text-muted);border:1px solid var(--border);">COMPLETA</span>
+                            </div>
+                            <div class="campaign-meta">
+                                <span class="meta-chip">👥 5 jugadores</span>
+                                <span class="meta-chip">📖 6 sesiones</span>
+                                <span class="meta-chip">✅ 12 Jun 2026</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:100%;background:linear-gradient(90deg,var(--text-muted),#6b7280);"></div>
+                            </div>
+                            <div class="progress-label"><span>Campaña finalizada</span><span>100%</span></div>
+                        </article>
+
+                    </div>
+                </section>
+
+                <!-- ===== COL 2: CHARACTERS ===== -->
+                <section class="panel" aria-labelledby="characters-heading">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <div class="panel-icon icon-arcane" aria-hidden="true">🛡️</div>
+                            <h2 id="characters-heading" class="font-display">Fichas de Personaje</h2>
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-ghost" style="padding:4px 8px;font-size:0.7rem;" aria-pressed="true">Activos</button>
+                            <button class="btn btn-ghost" style="padding:4px 8px;font-size:0.7rem;" aria-label="Añadir personaje">✚</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="char-grid" role="list" aria-label="Fichas de personajes">
+
+                            <!-- Lyra — Ranger, HP full -->
+                            <article class="char-card ranger" role="listitem" tabindex="0" aria-label="Lyra Shadowdawn, Elfa Exploradora Nivel 6 — HP 52/52 plena">
+                                <div class="char-header">
+                                    <div class="char-avatar" aria-hidden="true">🧝</div>
+                                    <div class="char-info">
+                                        <div class="char-name">Lyra Shadowdawn</div>
+                                        <div class="char-subname">Elfa · Exploradora</div>
+                                    </div>
+                                    <div class="char-level">Nv6</div>
+                                </div>
+                                <div>
+                                    <div class="hp-row"><span>HP</span><span class="hp-val high">52/52</span></div>
+                                    <div class="hp-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="hp-fill high" style="width:100%;"></div></div>
+                                </div>
+                                <div class="stat-row" role="group" aria-label="Atributos">
+                                    <div class="stat-cell"><span class="stat-abbr">FUE</span><span class="stat-val">10</span><span class="stat-mod">+0</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">DES</span><span class="stat-val">18</span><span class="stat-mod">+4</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">CON</span><span class="stat-val">14</span><span class="stat-mod">+2</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">INT</span><span class="stat-val">12</span><span class="stat-mod">+1</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">SAB</span><span class="stat-val">16</span><span class="stat-mod">+3</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">CAR</span><span class="stat-val">13</span><span class="stat-mod">+1</span></div>
+                                </div>
+                                <div class="char-actions">
+                                    <button class="char-action-btn damage" aria-label="Aplicar daño">⚔ DMG</button>
+                                    <button class="char-action-btn heal"   aria-label="Curar">❤ CUR</button>
+                                    <button class="char-action-btn"        aria-label="Ficha">📋</button>
+                                    <button class="char-action-btn"        aria-label="Editar">✏</button>
+                                </div>
+                            </article>
+
+                            <!-- Theron — Fighter, HP medium + Exhausted -->
+                            <article class="char-card warrior" role="listitem" tabindex="0" aria-label="Theron Ironforge, Enano Guerrero Nivel 5 — HP 38/60 — Agotado">
+                                <div class="char-header">
+                                    <div class="char-avatar" aria-hidden="true">⚒️</div>
+                                    <div class="char-info">
+                                        <div class="char-name">Theron Ironforge</div>
+                                        <div class="char-subname">Enano · Guerrero</div>
+                                    </div>
+                                    <div class="char-level">Nv5</div>
+                                </div>
+                                <div>
+                                    <div class="hp-row"><span>HP</span><span class="hp-val medium">38/60</span></div>
+                                    <div class="hp-bar" role="progressbar" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"><div class="hp-fill medium" style="width:63%;"></div></div>
+                                </div>
+                                <div class="stat-row" role="group" aria-label="Atributos">
+                                    <div class="stat-cell"><span class="stat-abbr">FUE</span><span class="stat-val">18</span><span class="stat-mod">+4</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">DES</span><span class="stat-val">11</span><span class="stat-mod">+0</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">CON</span><span class="stat-val">17</span><span class="stat-mod">+3</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">INT</span><span class="stat-val">9</span><span class="stat-mod">-1</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">SAB</span><span class="stat-val">12</span><span class="stat-mod">+1</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">CAR</span><span class="stat-val">10</span><span class="stat-mod">+0</span></div>
+                                </div>
+                                <div class="conditions" aria-label="Condición: Agotado">
+                                    <span class="condition-tag cond-exhausted">Agotado</span>
+                                </div>
+                                <div class="char-actions">
+                                    <button class="char-action-btn damage">⚔ DMG</button>
+                                    <button class="char-action-btn heal">❤ CUR</button>
+                                    <button class="char-action-btn">📋</button>
+                                    <button class="char-action-btn">✏</button>
+                                </div>
+                            </article>
+
+                            <!-- Zara — Wizard, HP critical + Burning -->
+                            <article class="char-card mage" role="listitem" tabindex="0" aria-label="Zara al-Rashid, Tiefling Maga Nivel 6 — HP 8/38 CRÍTICO — Quemada">
+                                <div class="char-header">
+                                    <div class="char-avatar" aria-hidden="true">🔮</div>
+                                    <div class="char-info">
+                                        <div class="char-name">Zara al-Rashid</div>
+                                        <div class="char-subname">Tiefling · Maga</div>
+                                    </div>
+                                    <div class="char-level">Nv6</div>
+                                </div>
+                                <div>
+                                    <div class="hp-row"><span>HP</span><span class="hp-val low">8/38 ⚠</span></div>
+                                    <div class="hp-bar" role="progressbar" aria-valuenow="21" aria-valuemin="0" aria-valuemax="100"><div class="hp-fill low" style="width:21%;"></div></div>
+                                </div>
+                                <div class="stat-row" role="group" aria-label="Atributos">
+                                    <div class="stat-cell"><span class="stat-abbr">FUE</span><span class="stat-val">8</span><span class="stat-mod">-1</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">DES</span><span class="stat-val">14</span><span class="stat-mod">+2</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">CON</span><span class="stat-val">13</span><span class="stat-mod">+1</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">INT</span><span class="stat-val">19</span><span class="stat-mod">+4</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">SAB</span><span class="stat-val">11</span><span class="stat-mod">+0</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">CAR</span><span class="stat-val">15</span><span class="stat-mod">+2</span></div>
+                                </div>
+                                <div class="conditions" aria-label="Condición: Quemada">
+                                    <span class="condition-tag cond-burning">Quemada</span>
+                                </div>
+                                <div class="char-actions">
+                                    <button class="char-action-btn damage">⚔ DMG</button>
+                                    <button class="char-action-btn heal" style="color:#4ade80;font-weight:700;">❤ ¡CURAR!</button>
+                                    <button class="char-action-btn">📋</button>
+                                    <button class="char-action-btn">✏</button>
+                                </div>
+                            </article>
+
+                            <!-- Brodak — Paladin, HP full -->
+                            <article class="char-card cleric" role="listitem" tabindex="0" aria-label="Brodak Stonefist, Humano Paladín Nivel 5 — HP 55/55 plena">
+                                <div class="char-header">
+                                    <div class="char-avatar" aria-hidden="true">🗡️</div>
+                                    <div class="char-info">
+                                        <div class="char-name">Brodak Stonefist</div>
+                                        <div class="char-subname">Humano · Paladín</div>
+                                    </div>
+                                    <div class="char-level">Nv5</div>
+                                </div>
+                                <div>
+                                    <div class="hp-row"><span>HP</span><span class="hp-val high">55/55</span></div>
+                                    <div class="hp-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><div class="hp-fill high" style="width:100%;"></div></div>
+                                </div>
+                                <div class="stat-row" role="group" aria-label="Atributos">
+                                    <div class="stat-cell"><span class="stat-abbr">FUE</span><span class="stat-val">16</span><span class="stat-mod">+3</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">DES</span><span class="stat-val">10</span><span class="stat-mod">+0</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">CON</span><span class="stat-val">15</span><span class="stat-mod">+2</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">INT</span><span class="stat-val">11</span><span class="stat-mod">+0</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">SAB</span><span class="stat-val">13</span><span class="stat-mod">+1</span></div>
+                                    <div class="stat-cell"><span class="stat-abbr">CAR</span><span class="stat-val">17</span><span class="stat-mod">+3</span></div>
+                                </div>
+                                <div class="char-actions">
+                                    <button class="char-action-btn damage">⚔ DMG</button>
+                                    <button class="char-action-btn heal">❤ CUR</button>
+                                    <button class="char-action-btn">📋</button>
+                                    <button class="char-action-btn">✏</button>
+                                </div>
+                            </article>
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== COL 3: SESSIONS + LOG ===== -->
+                <div class="col3">
+
+                    <!-- Session History -->
+                    <section class="panel" style="flex:1;min-height:0;" aria-labelledby="sessions-heading">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <div class="panel-icon icon-teal" aria-hidden="true">📜</div>
+                                <h2 id="sessions-heading" class="font-display">Historial de Sesiones</h2>
+                            </div>
+                            <button class="btn btn-ghost" style="padding:4px 10px;font-size:0.7rem;">Ver todas</button>
+                        </div>
+                        <div class="panel-body" role="list" aria-label="Historial de sesiones">
+
+                            <!-- Session #12 — CURRENT -->
+                            <article class="session-entry current-session" role="listitem" tabindex="0" aria-label="Sesión 12 en curso: Sangre en las Brumas">
+                                <div class="session-top">
+                                    <span class="session-num">Sesión #12</span>
+                                    <div style="display:flex;align-items:center;gap:4px;">
+                                        <span style="width:5px;height:5px;border-radius:50%;background:var(--teal-light);display:inline-block;animation:pulse 2s infinite;" aria-hidden="true"></span>
+                                        <span style="font-size:0.62rem;color:var(--teal-light);font-weight:700;">EN CURSO</span>
+                                    </div>
+                                </div>
+                                <div class="session-title" style="color:var(--teal-light);">Sangre en las Brumas</div>
+                                <p class="session-summary">El grupo se adentra en el Castillo Ravenloft. Zara gravemente herida por murciélagos de Strahd. Theron activó una trampa de flechas.</p>
+                                <div class="session-tags">
+                                    <span class="session-tag tag-combat">⚔ Combate</span>
+                                    <span class="session-tag tag-explore">🗺 Exploración</span>
+                                </div>
+                                <div class="session-stats">
+                                    <span class="session-stat">⏱ <strong>1h 47m</strong></span>
+                                    <span class="session-stat">⚔ <strong>3</strong> combates</span>
+                                    <span class="session-stat">👹 <strong>8</strong> caídos</span>
+                                </div>
+                            </article>
+
+                            <!-- Session #11 -->
+                            <article class="session-entry" role="listitem" tabindex="0" aria-label="Sesión 11: El Consejo de Vallaki, 24 Jun 2026">
+                                <div class="session-top">
+                                    <span class="session-num">Sesión #11</span>
+                                    <span class="session-date">24 Jun 2026</span>
+                                </div>
+                                <div class="session-title">El Consejo de Vallaki</div>
+                                <p class="session-summary">Negociación tensa con el Burgomaestre Vallakovich. Lyra descubrió el pasaje secreto bajo la iglesia.</p>
+                                <div class="session-tags">
+                                    <span class="session-tag tag-roleplay">💬 Roleplay</span>
+                                    <span class="session-tag tag-mystery">🔍 Misterio</span>
+                                </div>
+                                <div class="session-stats">
+                                    <span class="session-stat">⏱ <strong>3h 10m</strong></span>
+                                    <span class="session-stat">⚔ <strong>1</strong> combate</span>
+                                    <span class="session-stat">💬 <strong>2</strong> PNJs clave</span>
+                                </div>
+                            </article>
+
+                            <!-- Session #10 -->
+                            <article class="session-entry" role="listitem" tabindex="0" aria-label="Sesión 10: La Taberna del Lobo Hambriento, 17 Jun 2026">
+                                <div class="session-top">
+                                    <span class="session-num">Sesión #10</span>
+                                    <span class="session-date">17 Jun 2026</span>
+                                </div>
+                                <div class="session-title">La Taberna del Lobo Hambriento</div>
+                                <p class="session-summary">Encuentro con los Vistani. Theron casi muere a manos de los hombres lobo. Brodak usó sus últimas Imposición de Manos.</p>
+                                <div class="session-tags">
+                                    <span class="session-tag tag-combat">⚔ Combate</span>
+                                    <span class="session-tag tag-roleplay">💬 Roleplay</span>
+                                    <span class="session-tag tag-death">💀 Near-Death</span>
+                                </div>
+                                <div class="session-stats">
+                                    <span class="session-stat">⏱ <strong>2h 55m</strong></span>
+                                    <span class="session-stat">⚔ <strong>2</strong> combates</span>
+                                    <span class="session-stat">👹 <strong>5</strong> caídos</span>
+                                </div>
+                            </article>
+
+                        </div>
+                    </section>
+
+                    <!-- Live Log -->
+                    <section class="panel" style="flex:0 0 auto;" aria-labelledby="log-heading">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <div class="panel-icon" style="background:var(--arcane-dim);" aria-hidden="true">📡</div>
+                                <h2 id="log-heading" class="font-display">Bitácora en Vivo</h2>
+                            </div>
+                            <button class="btn btn-ghost" id="btn-clear-log" style="padding:3px 8px;font-size:0.65rem;" aria-label="Limpiar bitácora">Limpiar</button>
+                        </div>
+                        <div class="panel-body" style="max-height:180px;" role="log" aria-live="polite" aria-label="Registro de eventos">
+
+                            <div class="log-entry-item"><span class="log-time">21:44</span><span class="log-dot purple" aria-hidden="true"></span><span class="log-msg"><strong>Zara</strong> lanza Bola de Fuego → 6d6 = <strong>28 daño</strong></span></div>
+                            <div class="log-entry-item"><span class="log-time">21:43</span><span class="log-dot red"    aria-hidden="true"></span><span class="log-msg"><strong>Strahd</strong> ataca a <strong>Zara</strong> → 18 daño. HP: 8/38 ⚠</span></div>
+                            <div class="log-entry-item"><span class="log-time">21:41</span><span class="log-dot gold"   aria-hidden="true"></span><span class="log-msg"><strong>Lyra</strong> d20 = <strong>19</strong> → Crítico (2d8+4 = 21)</span></div>
+                            <div class="log-entry-item"><span class="log-time">21:39</span><span class="log-dot blue"   aria-hidden="true"></span><span class="log-msg"><strong>Brodak</strong> Imposición de Manos → <strong>+10 HP</strong> a Theron</span></div>
+                            <div class="log-entry-item"><span class="log-time">21:35</span><span class="log-dot teal"   aria-hidden="true"></span><span class="log-msg">Iniciativa calculada. <strong>Lyra</strong> va primera (22)</span></div>
+
+                        </div>
+                    </section>
+
+                </div><!-- /col3 -->
+
+            </div><!-- /dashboard-grid -->
+
+        </main>
+
+    </div><!-- /app-shell -->
+
+    <!-- ============================================
+       FANTASY REALMS MODALS (HTML Overlay Containers)
+       ============================================ -->
+
+    <!-- 1. Modal Campaña -->
+    <div id="modal-campaign" class="fr-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mc-title">
+        <div class="fr-modal">
+            <div class="fr-modal-header">
+                <h3 id="mc-title" class="fr-modal-title">🏰 Crear Campaña Épica</h3>
+                <button class="fr-modal-close" onclick="closeModal('modal-campaign')" aria-label="Cerrar modal">✕</button>
+            </div>
+            <div class="fr-modal-body">
+                <div class="fr-form-group">
+                    <label class="fr-label" for="mc-name">Nombre de la Campaña</label>
+                    <input type="text" id="mc-name" class="fr-input" placeholder="Ej. La Maldición de Strahd" required autocomplete="off">
+                </div>
+                <div class="fr-form-group">
+                    <label class="fr-label" for="mc-system">Sistema de Juego</label>
+                    <select id="mc-system" class="fr-select">
+                        <option value="D&D 5e">Dungeons & Dragons 5e</option>
+                        <option value="Pathfinder 2e">Pathfinder 2e</option>
+                        <option value="Call of Cthulhu">La Llamada de Cthulhu</option>
+                        <option value="Homebrew">Sistema Propio (Homebrew)</option>
+                    </select>
+                </div>
+                <div class="fr-form-group">
+                    <label class="fr-label" for="mc-setting">Ambientación / Reino</label>
+                    <input type="text" id="mc-setting" class="fr-input" placeholder="Ej. Ravenloft, Faerûn o tu propio mundo" autocomplete="off">
+                </div>
+                <div class="fr-form-group">
+                    <label class="fr-label" for="mc-arc">Arco Narrativo Actual</label>
+                    <input type="text" id="mc-arc" class="fr-input" placeholder="Ej. Capítulo 1: El Escape de las Mazmorras" autocomplete="off">
+                </div>
+                <div class="fr-form-group">
+                    <label class="fr-label" for="mc-progress">Progreso del Arco: <span id="mc-progress-val">0</span>%</label>
+                    <input type="range" id="mc-progress" min="0" max="100" value="0" class="fr-input" oninput="document.getElementById('mc-progress-val').textContent=this.value">
+                </div>
+                <div class="fr-form-group">
+                    <label class="fr-label" for="mc-players">Cantidad de Jugadores</label>
+                    <input type="number" id="mc-players" min="1" max="12" value="4" class="fr-input">
+                </div>
+                <div class="fr-form-group">
+                    <label class="fr-label" for="mc-notes">Notas Secretas del DM (Opcional)</label>
+                    <textarea id="mc-notes" class="fr-textarea" placeholder="Solo vos podés ver esto en modo DM..."></textarea>
+                </div>
+            </div>
+            <div class="fr-modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('modal-campaign')">Cancelar</button>
+                <button class="btn btn-primary" onclick="submitCreateCampaign()">Crear Campaña</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modal Sesión -->
+    <div id="modal-session" class="fr-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="ms-title">
+        <div class="fr-modal">
+            <div class="fr-modal-header">
+                <h3 id="ms-title" class="fr-modal-title">📜 Registrar Sesión de Juego</h3>
+                <button class="fr-modal-close" onclick="closeModal('modal-session')" aria-label="Cerrar modal">✕</button>
+            </div>
+            <div class="fr-modal-body">
+                <div class="fr-form-group">
+                    <label class="fr-label" for="ms-title-input">Título de la Sesión</label>
+                    <input type="text" id="ms-title-input" class="fr-input" placeholder="Ej. El Despertar del Dragón" required autocomplete="off">
+                </div>
+                <div class="fr-form-group">
+                    <label class="fr-label">Temáticas dominantes (Tags)</label>
+                    <div class="fr-checkbox-grid">
+                        <label class="fr-checkbox-label"><input type="checkbox" value="COMBAT"> ⚔ Combate</label>
+                        <label class="fr-checkbox-label"><input type="checkbox" value="ROLEPLAY"> 💬 Roleplay</label>
+                        <label class="fr-checkbox-label"><input type="checkbox" value="EXPLORATION"> 🗺 Exploración</label>
+                        <label class="fr-checkbox-label"><input type="checkbox" value="MYSTERY"> 🔍 Misterio</label>
+                        <label class="fr-checkbox-label"><input type="checkbox" value="NEAR_DEATH"> 💀 Peligro Mortal</label>
+                        <label class="fr-checkbox-label"><input type="checkbox" value="LOOT"> 💰 Tesoros</label>
+                    </div>
+                </div>
+                <div class="fr-form-group">
+                    <label class="fr-label" for="ms-summary">Resumen Narrativo</label>
+                    <textarea id="ms-summary" class="fr-textarea" placeholder="¿Qué descubrieron los héroes en este encuentro?"></textarea>
+                </div>
+                <div class="fr-form-group">
+                    <label class="fr-label" for="ms-duration">Duración estimada (en minutos)</label>
+                    <input type="number" id="ms-duration" min="10" value="180" class="fr-input">
+                </div>
+            </div>
+            <div class="fr-modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('modal-session')">Cancelar</button>
+                <button class="btn btn-primary" onclick="submitCreateSession()">Registrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Modal Combate / Iniciativa -->
+    <div id="modal-combat" class="fr-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcb-title">
+        <div class="fr-modal" style="max-width: 420px;">
+            <div class="fr-modal-header">
+                <h3 id="mcb-title" class="fr-modal-title">⚔ Iniciar Combate</h3>
+                <button class="fr-modal-close" onclick="closeModal('modal-combat')" aria-label="Cerrar modal">✕</button>
+            </div>
+            <div class="fr-modal-body" style="gap: 12px;">
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">
+                    Tirá o ingresá la iniciativa (d20 + modificadores) para ordenar la barra.
+                </p>
+                <div id="init-characters-list" style="display:flex; flex-direction:column; gap:8px;">
+                    <!-- Se carga dinámicamente con JS -->
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border); margin:8px 0;">
+                <div style="display:flex; gap:8px; align-items:flex-end;">
+                    <div class="fr-form-group" style="flex:1;">
+                        <label class="fr-label" for="monster-name">Agregar Enemigo/NPC</label>
+                        <input type="text" id="monster-name" class="fr-input" placeholder="Ej. Goblin Líder" autocomplete="off">
+                    </div>
+                    <div class="fr-form-group" style="width:70px;">
+                        <label class="fr-label" for="monster-init">Inic.</label>
+                        <input type="number" id="monster-init" class="fr-input" value="10">
+                    </div>
+                    <button class="btn btn-ghost" onclick="addMonsterToCombat()" style="padding: 9px 12px;">＋</button>
+                </div>
+            </div>
+            <div class="fr-modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('modal-combat')">Cancelar</button>
+                <button class="btn btn-primary" onclick="startCombatTracker()">⚔ Lanzar Iniciativa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Modal Finalizar Sesión -->
+    <div id="modal-finish-session" class="fr-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mfs-title">
+        <div class="fr-modal">
+            <div class="fr-modal-header">
+                <h3 id="mfs-title" class="fr-modal-title">⏹ Concluir Sesión de Juego</h3>
+                <button class="fr-modal-close" onclick="closeModal('modal-finish-session')" aria-label="Cerrar modal">✕</button>
+            </div>
+            <div class="fr-modal-body">
+                <p style="font-size:0.75rem; color:var(--text-secondary);">
+                    Ingresá el balance final de la sesión antes de guardarla en el historial de campañas.
+                </p>
+                <div class="fr-form-group">
+                    <label class="fr-label" for="mfs-summary">Deslace Épico (Resumen de Bitácora)</label>
+                    <textarea id="mfs-summary" class="fr-textarea" placeholder="Resumí los acontecimientos importantes, muertes o hitos..."></textarea>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div class="fr-form-group">
+                        <label class="fr-label" for="mfs-duration">Duración (minutos)</label>
+                        <input type="number" id="mfs-duration" class="fr-input" value="180">
+                    </div>
+                    <div class="fr-form-group">
+                        <label class="fr-label" for="mfs-combats">Combates librados</label>
+                        <input type="number" id="mfs-combats" class="fr-input" value="1">
+                    </div>
+                    <div class="fr-form-group" style="grid-column: span 2;">
+                        <label class="fr-label" for="mfs-enemies">Enemigos caídos (derrotados)</label>
+                        <input type="number" id="mfs-enemies" class="fr-input" value="5">
+                    </div>
+                </div>
+            </div>
+            <div class="fr-modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('modal-finish-session')">Cancelar</button>
+                <button class="btn btn-primary" onclick="submitFinishSession()" style="background:var(--crimson);">Archivar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // =============================================
+    // FANTASY REALMS DASHBOARD — API Client Layer
+    // Conectado al backend Spring Boot en /api/*
+    // Fallback a datos demo si el servidor no está disponible
+    // =============================================
+
+    const API_BASE = '/api';
+    const state = {
+        campaigns:  [],
+        characters: [],
+        sessions:   [],
+        activeCampaignId: null
+    };
+
+    // --- Auth ---
+    function getToken() { return localStorage.getItem('dm_saas_token'); }
+    function authHeaders() {
+        const t = getToken();
+        return t ? { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' }
+                 : { 'Content-Type': 'application/json' };
+    }
+    async function apiFetch(path, opts = {}) {
+        opts.headers = { ...authHeaders(), ...(opts.headers || {}) };
+        const res = await fetch(API_BASE + path, opts);
+        if (res.status === 401 || res.status === 403) { showAuthBanner(); throw new Error('No autenticado'); }
+        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || `Error ${res.status}`); }
+        return res.status === 204 ? null : res.json();
+    }
+    function decodeToken(token) {
+        if (!token) return null;
+        try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
+        catch { return null; }
+    }
+
+    // --- Auth Banner ---
+    function showAuthBanner() {
+        if (document.getElementById('auth-banner')) return;
+        const b = document.createElement('div');
+        b.id = 'auth-banner';
+        b.style.cssText = 'position:fixed;top:56px;left:0;right:0;z-index:200;background:linear-gradient(135deg,var(--arcane),var(--crimson));color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;font-size:0.8rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+        b.innerHTML = `<span>🔐 Iniciá sesión para cargar tus campañas reales. Mostrando datos de ejemplo.</span>
+            <button onclick="window.location='/index.html'" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer;font-weight:700;font-size:0.75rem;">Ir al login</button>`;
+        document.body.appendChild(b);
+    }
+    function hideAuthBanner() { document.getElementById('auth-banner')?.remove(); }
+
+    // --- MODAL UTILS ---
+    window.openModal = function(id) {
+        document.getElementById(id)?.classList.add('active');
+        announceToScreenReader('Ventana emergente abierta');
+    };
+    window.closeModal = function(id) {
+        document.getElementById(id)?.classList.remove('active');
+    };
+
+    // --- INIT ---
+    async function init() {
+        const payload = decodeToken(getToken());
+        if (payload) {
+            const subEl = document.querySelector('.brand-sub');
+            if (subEl) subEl.textContent = `${payload.sub.split('@')[0]} · ${payload.tier}`;
+            hideAuthBanner();
+        }
+        const [ok1, ok2] = await Promise.all([loadCampaigns(), loadCharacters()]);
+        if (!ok1 || !ok2) {
+            loadDemoData();
+        } else {
+            setupDynamicInitiativeForm();
+        }
+        setRole('dm');
+    }
+
+    // --- CAMPAIGNS ---
+    async function loadCampaigns() {
+        try {
+            const camps = await apiFetch('/campaigns');
+            state.campaigns = camps;
+            renderCampaigns(camps);
+            const active = camps.find(c => c.status === 'ACTIVE');
+            if (active) {
+                state.activeCampaignId = active.id;
+                await loadSessions(active.id);
+                updateSidebarSession(active);
+            }
+            updateMetrics();
+            return true;
+        } catch(e) { console.warn('Campaigns:', e.message); return false; }
+    }
+
+    function renderCampaigns(camps) {
+        const el = document.querySelector('[aria-label="Lista de campañas"]');
+        if (!el) return;
+        if (!camps.length) {
+            el.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:0.8rem;">
+                Sin campañas todavía.<br><br>
+                <button class="btn btn-primary" onclick="openModal('modal-campaign')" style="font-size:0.75rem;">✚ Primera campaña</button></div>`;
+            return;
+        }
+        el.innerHTML = camps.map(c => buildCampaignCard(c)).join('');
+    }
+
+    function buildCampaignCard(c) {
+        const SM = {
+            ACTIVE:    { style:'background:rgba(13,148,136,.2);color:var(--teal-light);border:1px solid rgba(45,212,191,.25);', label:'🟢 EN VIVO' },
+            PAUSED:    { style:'background:var(--arcane-dim);color:var(--arcane-light);border:1px solid rgba(124,58,237,.25);',  label:'PAUSADA' },
+            COMPLETED: { style:'background:rgba(255,255,255,.05);color:var(--text-muted);border:1px solid var(--border);',       label:'COMPLETA' }
+        };
+        const s = SM[c.status] || SM.PAUSED;
+        const p = c.arcProgress || 0;
+        const pc = c.status==='ACTIVE'?'background:linear-gradient(90deg,var(--teal),var(--teal-light));':c.status==='COMPLETED'?'background:var(--text-muted);':'';
+        return `<article class="campaign-card ${c.status==='ACTIVE'?'active-session':c.status==='PAUSED'?'paused':'completed'}" role="listitem" tabindex="0"
+                aria-label="Campaña ${escHtml(c.name)}" onclick="selectCampaign(${c.id})" onkeydown="if(event.key==='Enter')selectCampaign(${c.id})">
+            <div class="campaign-top">
+                <div>
+                    <div class="campaign-name">${escHtml(c.name)}</div>
+                    <div class="campaign-system">${escHtml(c.system||'')}${c.setting?' · '+escHtml(c.setting):''}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                    <span class="badge" style="${s.style}">${s.label}</span>
+                    ${c.status!=='ACTIVE'?`<button class="char-action-btn" onclick="event.stopPropagation();changeCampaignStatus(${c.id},'ACTIVE')" style="font-size:.6rem;padding:2px 6px;">▶ Activar</button>`:''}
+                </div>
+            </div>
+            <div class="campaign-meta">
+                ${c.playerCount?`<span class="meta-chip">👥 ${c.playerCount} jugadores</span>`:''}
+                <span class="meta-chip">📖 ${c.totalSessions||0} sesiones</span>
+                ${c.lastPlayedAt?`<span class="meta-chip">📅 ${fmtDate(c.lastPlayedAt)}</span>`:''}
+            </div>
+            ${c.currentArc?`<div class="progress-bar"><div class="progress-fill" style="width:${p}%;${pc}"></div></div>
+            <div class="progress-label"><span>${escHtml(c.currentArc)}</span><span>${p}%</span></div>`:''}
+        </article>`;
+    }
+
+    async function selectCampaign(id) {
+        state.activeCampaignId = id;
+        const camp = state.campaigns.find(c => c.id === id);
+        await loadSessions(id);
+        if (camp) updateSidebarSession(camp);
+        addLiveLog(`Campaña seleccionada: <strong>${camp ? camp.name : id}</strong>`, 'teal');
+    }
+
+    async function changeCampaignStatus(id, status) {
+        try {
+            await apiFetch(`/campaigns/${id}/status`, { method:'PATCH', body:JSON.stringify({status}) });
+            addLiveLog(`Estado de campaña → <strong>${status}</strong>`, 'teal');
+            await loadCampaigns();
+        } catch(e) { addLiveLog(`Error: ${e.message}`, 'red'); }
+    }
+
+    window.submitCreateCampaign = async function() {
+        const name = document.getElementById('mc-name').value;
+        if (!name) { alert('El nombre es obligatorio.'); return; }
+        const body = {
+            name: name,
+            system: document.getElementById('mc-system').value,
+            setting: document.getElementById('mc-setting').value || '',
+            currentArc: document.getElementById('mc-arc').value || '',
+            arcProgress: parseInt(document.getElementById('mc-progress').value) || 0,
+            playerCount: parseInt(document.getElementById('mc-players').value) || 4,
+            dmNotes: document.getElementById('mc-notes').value || '',
+            status: 'ACTIVE'
+        };
+
+        try {
+            await apiFetch('/campaigns', { method:'POST', body:JSON.stringify(body) });
+            addLiveLog(`Campaña <strong>${escHtml(name)}</strong> iniciada con éxito! 🏰`, 'gold');
+            closeModal('modal-campaign');
+            await loadCampaigns();
+        } catch(e) { addLiveLog(`Error: ${e.message}`, 'red'); }
+    };
+
+    // --- CHARACTERS ---
+    const CLS_ICON = { Guerrero:'⚒️',Barbaro:'🪓','Paladín':'🗡️',Ranger:'🏹',Explorador:'🧝',Mago:'🔮',Brujo:'🌑',Hechicero:'✨',Bardo:'🎶','Clérigo':'✝️',Druida:'🌿',Monje:'👐','Pícaro':'🗡️' };
+    const CLS_CSS  = { Guerrero:'warrior',Barbaro:'warrior','Paladín':'cleric',Ranger:'ranger',Explorador:'ranger',Mago:'mage',Brujo:'mage',Hechicero:'mage',Bardo:'mage','Clérigo':'cleric',Druida:'ranger',Monje:'warrior','Pícaro':'rogue' };
+
+    async function loadCharacters() {
+        try {
+            const chars = await apiFetch('/characters');
+            state.characters = chars.filter(c => !c.isDead);
+            renderCharacters(state.characters);
+            setupDynamicInitiativeForm();
+            return true;
+        } catch(e) { console.warn('Characters:', e.message); return false; }
+    }
+
+    function renderCharacters(chars) {
+        const g = document.querySelector('.char-grid');
+        if (!g) return;
+        const heroes = chars.filter(c => c.type === 'HEROE');
+        if (!heroes.length) { g.innerHTML = `<div style="grid-column:span 2;text-align:center;color:var(--text-muted);padding:20px;font-size:.8rem;">Sin personajes activos.</div>`; return; }
+        g.innerHTML = heroes.map(c => buildCharCard(c)).join('');
+    }
+
+    function buildCharCard(c) {
+        const cur = c.currentHp ?? c.hp ?? 0;
+        const max = c.maxHp   ?? c.hp ?? 1;
+        const pct = max>0 ? Math.round(cur/max*100) : 0;
+        const hc  = pct>60?'high':pct>30?'medium':'low';
+        const mod = v => { const m=Math.floor(((v||10)-10)/2); return m>=0?`+${m}`:`${m}`; };
+        const cls = c.charClass||'';
+        return `<article class="char-card ${CLS_CSS[cls]||'warrior'}" role="listitem" tabindex="0"
+                aria-label="${escHtml(c.name)}, Nivel ${c.level||1}, HP ${cur}/${max}${pct<=20?' ⚠':''}">
+            <div class="char-header">
+                <div class="char-avatar" aria-hidden="true">${CLS_ICON[cls]||'🛡️'}</div>
+                <div class="char-info">
+                    <div class="char-name">${escHtml(c.name)}</div>
+                    <div class="char-subname">${escHtml(c.race||'')} · ${escHtml(cls)}</div>
+                </div>
+                <div class="char-level">Nv${c.level||1}</div>
+            </div>
+            <div>
+                <div class="hp-row"><span>HP</span><span class="hp-val ${hc}">${cur}/${max}${pct<=20?' ⚠':''}</span></div>
+                <div class="hp-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="hp-fill ${hc}" style="width:${pct}%;"></div></div>
+            </div>
+            <div class="stat-row" role="group" aria-label="Atributos">
+                ${['FUE','DES','CON','INT','SAB','CAR'].map((a,i)=>{const v=[c.str,c.dex,c.con,c.intel,c.wis,c.cha][i]||10;
+                    return `<div class="stat-cell"><span class="stat-abbr">${a}</span><span class="stat-val">${v}</span><span class="stat-mod">${mod(v)}</span></div>`;}).join('')}
+            </div>
+            ${c.status?`<div class="conditions"><span class="condition-tag cond-exhausted">${escHtml(c.status)}</span></div>`:''}
+            <div class="char-actions">
+                <button class="char-action-btn damage" onclick="quickHp(${c.id},-5)" aria-label="Aplicar 5 daño">⚔ -5</button>
+                <button class="char-action-btn heal"   onclick="quickHp(${c.id},+5)" aria-label="Curar 5 HP">❤ +5</button>
+                <button class="char-action-btn"        onclick="quickHp(${c.id},-1)" style="flex:0;padding:3px 7px;" aria-label="-1 HP">-1</button>
+                <button class="char-action-btn heal"   onclick="quickHp(${c.id},+1)" style="flex:0;padding:3px 7px;" aria-label="+1 HP">+1</button>
+                <button class="char-action-btn"        onclick="window.location='/index.html#char-${c.id}'" aria-label="Ver ficha">📋</button>
+            </div>
+        </article>`;
+    }
+
+    async function quickHp(id, delta) {
+        try {
+            const u = await apiFetch(`/characters/${id}/hp`, { method:'PATCH', body:JSON.stringify({delta}) });
+            const idx = state.characters.findIndex(c => c.id === id);
+            if (idx !== -1) state.characters[idx] = u;
+            renderCharacters(state.characters);
+            addLiveLog(`<strong>${u.name}</strong> ${delta>0?`curado ${delta} HP ❤️`:`recibió ${Math.abs(delta)} daño ⚔️`} → ${u.currentHp}/${u.maxHp}`,
+                       delta>0?'teal':'red');
+        } catch(e) { addLiveLog(`Error HP: ${e.message}`, 'red'); }
+    }
+
+    // --- SESSIONS ---
+    async function loadSessions(campaignId) {
+        try {
+            const sessions = await apiFetch(`/campaigns/${campaignId}/sessions`);
+            state.sessions = sessions;
+            renderSessions(sessions);
+            updateMetrics();
+            return true;
+        } catch(e) { console.warn('Sessions:', e.message); return false; }
+    }
+
+    function renderSessions(sessions) {
+        const el = document.querySelector('[aria-label="Historial de sesiones"]');
+        if (!el) return;
+        if (!sessions.length) {
+            el.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:16px;font-size:.8rem;">
+                Sin sesiones todavía.<br><br>
+                <button class="btn btn-ghost" onclick="openModal('modal-session')" style="font-size:.72rem;padding:5px 10px;">📜 Registrar sesión</button></div>`;
+            return;
+        }
+        el.innerHTML = sessions.map(s => buildSessionCard(s)).join('');
+    }
+
+    const TAG_MAP   = { COMBAT:'tag-combat',ROLEPLAY:'tag-roleplay',EXPLORATION:'tag-explore',MYSTERY:'tag-mystery',NEAR_DEATH:'tag-death',LOOT:'tag-mystery' };
+    const TAG_LABEL = { COMBAT:'⚔ Combate',ROLEPLAY:'💬 Roleplay',EXPLORATION:'🗺 Exploración',MYSTERY:'🔍 Misterio',NEAR_DEATH:'💀 Near-Death',LOOT:'💰 Loot' };
+
+    function buildSessionCard(s) {
+        const tags = s.tags ? s.tags.split(',').map(t=>t.trim()).filter(Boolean) : [];
+        const active = s.status === 'IN_PROGRESS';
+        return `<article class="session-entry ${active?'current-session':''}" role="listitem" tabindex="0"
+                aria-label="Sesión ${s.sessionNumber}: ${escHtml(s.title)}">
+            <div class="session-top">
+                <span class="session-num">Sesión #${s.sessionNumber}</span>
+                ${active
+                    ? `<span style="display:flex;align-items:center;gap:4px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--teal-light);display:inline-block;animation:pulse 2s infinite;"></span><span style="font-size:.62rem;color:var(--teal-light);font-weight:700;">EN CURSO</span></span>`
+                    : `<span class="session-date">${s.playedAt?fmtDate(s.playedAt):''}</span>`}
+            </div>
+            <div class="session-title" ${active?'style="color:var(--teal-light);"':''}>${escHtml(s.title)}</div>
+            ${s.summary?`<p class="session-summary">${escHtml(s.summary)}</p>`:''}
+            ${tags.length?`<div class="session-tags">${tags.map(t=>`<span class="session-tag ${TAG_MAP[t]||'tag-mystery'}">${TAG_LABEL[t]||t}</span>`).join('')}</div>`:''}
+            <div class="session-stats">
+                ${s.durationMinutes?`<span class="session-stat">⏱ <strong>${fmtDur(s.durationMinutes)}</strong></span>`:''}
+                ${s.combatCount?`<span class="session-stat">⚔ <strong>${s.combatCount}</strong> combates</span>`:''}
+                ${s.enemiesDefeated?`<span class="session-stat">👹 <strong>${s.enemiesDefeated}</strong> caídos</span>`:''}
+            </div>
+        </article>`;
+    }
+
+    window.submitCreateSession = async function() {
+        if (!state.activeCampaignId) { alert('Seleccioná una campaña activa primero.'); return; }
+        const title = document.getElementById('ms-title-input').value;
+        if (!title) { alert('El título de la sesión es obligatorio.'); return; }
+
+        const checkedTags = Array.from(document.querySelectorAll('#modal-session input[type="checkbox"]:checked')).map(el => el.value);
+
+        const body = {
+            title: title,
+            summary: document.getElementById('ms-summary').value || '',
+            durationMinutes: parseInt(document.getElementById('ms-duration').value) || 180,
+            tags: checkedTags.join(','),
+            status: 'IN_PROGRESS',
+            combatCount: 0,
+            enemiesDefeated: 0
+        };
+
+        try {
+            await apiFetch(`/campaigns/${state.activeCampaignId}/sessions`, { method:'POST', body:JSON.stringify(body) });
+            addLiveLog(`Sesión <strong>${escHtml(title)}</strong> iniciada 🎲`, 'teal');
+            closeModal('modal-session');
+            await loadSessions(state.activeCampaignId);
+            await loadCampaigns();
+        } catch(e) { addLiveLog(`Error: ${e.message}`, 'red'); }
+    };
+
+    // --- METRICS ---
+    function updateMetrics() {
+        const active = state.campaigns.filter(c => c.status==='ACTIVE').length;
+        const heroes = state.characters.filter(c => c.type === 'HEROE' && !c.isDead).length;
+        const totalS = state.campaigns.reduce((s,c) => s+(c.totalSessions||0), 0);
+        const killed = state.sessions.reduce((s,ss) => s+(ss.enemiesDefeated||0), 0);
+        const vals = document.querySelectorAll('.metric-val');
+        [active, heroes, totalS, killed].forEach((v,i) => { if(vals[i]) vals[i].textContent = v; });
+    }
+
+    // --- DEMO FALLBACK ---
+    function loadDemoData() {
+        showAuthBanner();
+        const vals = document.querySelectorAll('.metric-val');
+        [3,4,12,23].forEach((v,i) => { if(vals[i]) vals[i].textContent = v; });
+        addLiveLog('Modo demo — iniciá sesión para cargar datos reales', 'purple');
+    }
+
+    // --- ROLE SWITCHER ---
+    function setRole(role) {
+        const isDM = role === 'dm';
+        document.getElementById('btn-dm-mode').classList.toggle('active', isDM);
+        document.getElementById('btn-player-mode').classList.toggle('active', !isDM);
+        document.getElementById('btn-dm-mode').setAttribute('aria-pressed', String(isDM));
+        document.getElementById('btn-player-mode').setAttribute('aria-pressed', String(!isDM));
+        document.querySelectorAll('.dm-only').forEach(el => el.style.display = isDM ? '' : 'none');
+        announceToScreenReader(isDM ? 'Modo Dungeon Master activado' : 'Modo Jugador activado');
+    }
+
+    // --- SIDEBAR UPDATE ---
+    function updateSidebarSession(camp) {
+        const widget = document.querySelector('.sidebar-session-card');
+        if (!widget) return;
+        const inProgress = state.sessions.find(s => s.status === 'IN_PROGRESS');
+        widget.querySelector('div:nth-child(2)').textContent = camp.name;
+        widget.querySelector('div:nth-child(3)').textContent = inProgress
+            ? `Sesión #${inProgress.sessionNumber} · En curso`
+            : 'Ninguna sesión activa';
+        widget.querySelector('.progress-fill').style.width = `${camp.arcProgress || 0}%`;
+    }
+
+    // --- DICE ROLLER ---
+    window.rollDie = function(faces) {
+        const result = Math.floor(Math.random() * faces) + 1;
+        const disp = document.getElementById('dice-display');
+        let ticks = 0;
+        const iv = setInterval(() => {
+            disp.textContent = Math.floor(Math.random() * faces) + 1;
+            if (++ticks > 8) {
+                clearInterval(iv);
+                disp.textContent = result;
+                disp.setAttribute('aria-label', `Resultado d${faces}: ${result}`);
+                disp.style.color = result===faces?'var(--teal-light)':result===1?'var(--crimson-light)':'var(--gold)';
+                setTimeout(() => disp.style.color = '', 1200);
+                addLiveLog(`d${faces} = <strong>${result}</strong>${result===faces?' 🎉 <strong>CRÍTICO!</strong>':result===1?' 💀 <strong>PIFIA!</strong>':''}`,
+                           result===faces?'teal':result===1?'red':'gold');
+            }
+        }, 60);
+    }
+
+    // --- INITIATIVE TRACKER (DYNAMIC COMBAT) ---
+    let combatList = [];
+
+    function setupDynamicInitiativeForm() {
+        const container = document.getElementById('init-characters-list');
+        if (!container) return;
+        const heroes = state.characters.filter(c => c.type === 'HEROE');
+        container.innerHTML = heroes.map(c => `
+            <div class="init-row">
+                <span>${CLS_ICON[c.charClass]||'🛡️'} ${escHtml(c.name)}</span>
+                <input type="number" class="fr-input init-input char-init-val" data-name="${escHtml(c.name)}" data-avatar="${CLS_ICON[c.charClass]||'🛡️'}" value="10">
+            </div>
+        `).join('');
+    }
+
+    window.addMonsterToCombat = function() {
+        const name = document.getElementById('monster-name').value;
+        const init = parseInt(document.getElementById('monster-init').value) || 10;
+        if (!name) return;
+
+        combatList.push({ name, init, avatar: '👹', isMonster: true });
+        addLiveLog(`Añadido <strong>${escHtml(name)}</strong> a la lista de combate`, 'purple');
+
+        document.getElementById('monster-name').value = '';
+        document.getElementById('monster-init').value = '10';
+        alert(`${name} añadido!`);
+    };
+
+    window.startCombatTracker = function() {
+        // Limpiar lista anterior
+        combatList = [];
+
+        // Leer aventureros
+        document.querySelectorAll('.char-init-val').forEach(el => {
+            combatList.push({
+                name: el.getAttribute('data-name'),
+                avatar: el.getAttribute('data-avatar'),
+                init: parseInt(el.value) || 10,
+                isMonster: false
+            });
+        });
+
+        // Ordenar por iniciativa de mayor a menor
+        combatList.sort((a,b) => b.init - a.init);
+
+        renderCombatQueue();
+        closeModal('modal-combat');
+        addLiveLog('⚔️ <strong>¡Iniciativa lanzada! El combate ha comenzado.</strong>', 'red');
+    };
+
+    function renderCombatQueue() {
+        const list = document.querySelector('.turn-list');
+        if (!list) return;
+
+        if (combatList.length === 0) {
+            list.innerHTML = `<span style="color:var(--text-muted);font-size:0.75rem;padding:8px;">Combate inactivo</span>`;
+            return;
+        }
+
+        list.innerHTML = combatList.map((c, i) => `
+            <div class="turn-item ${i === 0 ? 'active-turn' : ''}" role="listitem" tabindex="0" ${i === 0 ? 'aria-current="true"' : ''}
+                 aria-label="${escHtml(c.name)}, Iniciativa ${c.init}">
+                <span class="turn-avatar" aria-hidden="true">${c.avatar}</span>
+                <span class="turn-name">${escHtml(c.name)}</span>
+                <span class="turn-init">${c.init}</span>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('btn-next-turn')?.addEventListener('click', () => {
+        const items = document.querySelectorAll('.turn-item');
+        if (items.length === 0 || combatList.length === 0) {
+            // Abrir modal de combate si no hay combate activo
+            openModal('modal-combat');
+            return;
+        }
+        const activeIdx = Array.from(items).findIndex(el => el.classList.contains('active-turn'));
+        if (activeIdx === -1) return;
+
+        items[activeIdx].classList.remove('active-turn');
+        items[activeIdx].removeAttribute('aria-current');
+
+        const nextIdx = (activeIdx + 1) % items.length;
+        items[nextIdx].classList.add('active-turn');
+        items[nextIdx].setAttribute('aria-current', 'true');
+
+        const name = items[nextIdx].querySelector('.turn-name').textContent;
+        addLiveLog(`Turno de <strong>${name}</strong>`, 'gold');
+        announceToScreenReader(`Turno de ${name}`);
+    });
+
+    // --- FINISH SESSION ---
+    document.getElementById('btn-end-session')?.addEventListener('click', () => {
+        if (!state.activeCampaignId) { alert('No hay campaña activa.'); return; }
+        const activeSession = state.sessions.find(s => s.status === 'IN_PROGRESS');
+        if (!activeSession) { addLiveLog('No hay ninguna sesión activa en curso.', 'gold'); return; }
+
+        // Rellenar campos del modal con los datos actuales
+        document.getElementById('mfs-summary').value = activeSession.summary || '';
+        document.getElementById('mfs-duration').value = activeSession.durationMinutes || 180;
+        document.getElementById('mfs-combats').value = activeSession.combatCount || 0;
+        document.getElementById('mfs-enemies').value = activeSession.enemiesDefeated || 0;
+
+        openModal('modal-finish-session');
+    });
+
+    window.submitFinishSession = async function() {
+        const activeSession = state.sessions.find(s => s.status === 'IN_PROGRESS');
+        if (!activeSession) return;
+
+        const body = {
+            ...activeSession,
+            summary: document.getElementById('mfs-summary').value || '',
+            durationMinutes: parseInt(document.getElementById('mfs-duration').value) || 180,
+            combatCount: parseInt(document.getElementById('mfs-combats').value) || 0,
+            enemiesDefeated: parseInt(document.getElementById('mfs-enemies').value) || 0,
+            status: 'COMPLETED'
+        };
+
+        try {
+            await apiFetch(`/campaigns/${state.activeCampaignId}/sessions/${activeSession.id}`, {
+                method: 'PUT',
+                body: JSON.stringify(body)
+            });
+            addLiveLog(`Sesión <strong>${activeSession.title}</strong> finalizada y guardada. ✨`, 'teal');
+            closeModal('modal-finish-session');
+            await loadSessions(state.activeCampaignId);
+            await loadCampaigns();
+        } catch(e) { addLiveLog(`Error finalizando sesión: ${e.message}`, 'red'); }
+    };
+
+    // --- LIVE LOG ---
+    function addLiveLog(msg, color='blue') {
+        const log = document.querySelector('[role="log"]');
+        if (!log) return;
+        const now = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+        const e = document.createElement('div');
+        e.className = 'log-entry-item';
+        e.style.animation = 'fadeIn .3s ease';
+        e.innerHTML = `<span class="log-time">${now}</span><span class="log-dot ${color}" aria-hidden="true"></span><span class="log-msg">${msg}</span>`;
+        log.prepend(e);
+        const all = log.querySelectorAll('.log-entry-item');
+        if (all.length > 30) all[all.length-1].remove();
+    }
+    document.getElementById('btn-clear-log')?.addEventListener('click', () => {
+        document.querySelector('[role="log"]').innerHTML = '';
+        announceToScreenReader('Bitácora limpiada');
+    });
+
+    // --- Botones extras ---
+    document.getElementById('btn-new-campaign')?.addEventListener('click', () => openModal('modal-campaign'));
+
+    // --- KEYBOARD NAV ---
+    document.querySelectorAll('.char-card,.campaign-card,.session-entry,.turn-item').forEach(card => {
+        card.addEventListener('keydown', e => {
+            if (e.key==='Enter'||e.key===' ') { e.preventDefault(); card.querySelector('button')?.focus(); }
+        });
+    });
+
+    // --- SCREEN READER ---
+    function announceToScreenReader(msg) {
+        let el = document.getElementById('sr-announcer');
+        if (!el) {
+            el = document.createElement('div'); el.id = 'sr-announcer';
+            el.setAttribute('aria-live','assertive'); el.setAttribute('aria-atomic','true');
+            el.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;';
+            document.body.appendChild(el);
+        }
+        el.textContent = ''; setTimeout(() => el.textContent = msg, 50);
+    }
+
+    // --- UTILS ---
+    function escHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function fmtDate(dt) {
+        if (!dt) return '';
+        try { return new Date(dt).toLocaleDateString('es-AR',{day:'numeric',month:'short',year:'numeric'}); }
+        catch { return ''; }
+    }
+    function fmtDur(m) {
+        if (!m) return '';
+        const h=Math.floor(m/60), r=m%60;
+        return h>0 ? `${h}h ${r}m` : `${r}m`;
+    }
+
+    // --- BOOT ---
+    window.addEventListener('DOMContentLoaded', init);
+    </script>
+ 
+ </body>
+ </html>
+
+
